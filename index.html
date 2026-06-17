@@ -338,7 +338,9 @@ select.active-filter{border-color:var(--lime)!important;background:var(--ml)!imp
             <div class="fgrid">
               <div class="fg full"><label>Empresa / razón social *</label><input id="c-empresa" type="text" placeholder="Nombre de la empresa" oninput="updPrev()"></div>
               <div class="fg full"><label>Nombre del contacto</label><input id="c-contacto" type="text" placeholder="Ing. / Arq. Nombre" oninput="updPrev()"></div>
-              <div class="fg"><label>Ciudad</label><input id="c-ciudad" type="text" placeholder="Tijuana, BC." oninput="updPrev()"></div>
+              <div class="fg"><label>Teléfono de contacto</label><input id="c-tel" type="text" placeholder="ej. 664 123 4567" oninput="updPrev()"></div>
+              <div class="fg"><label>Ciudad (empresa)</label><input id="c-ciudad" type="text" placeholder="ej. Tijuana, BC." oninput="updPrev()"></div>
+              <div class="fg"><label>Ciudad del proyecto *</label><input id="c-proyecto" type="text" placeholder="ej. Chihuahua, Chihuahua" oninput="updPrev()"></div>
               <div class="fg"><label>Correo</label><input id="c-email" type="email" placeholder="contacto@empresa.com" oninput="updPrev()"></div>
               <div class="fg"><label>Zona</label><select id="c-zona" onchange="updPrev()"><option>Baja California</option><option>Los Cabos / BCS</option><option>Otro estado</option></select></div>
               <div class="fg"><label>¿Es ganable?</label><select id="c-ganable" onchange="togCRazon()"><option value="si">Sí — cliente controla la compra</option><option value="no">No — licitación / especificada</option></select></div>
@@ -820,9 +822,17 @@ function buildCotHTML(q, preview=false){
         <td style="padding:7px 14px;background:#f8f8f6;font-size:11px;font-weight:600;color:#3D4A38;border-bottom:1px solid #e8e8e4;">Razón Social</td>
         <td style="padding:7px 14px;font-size:12px;font-weight:600;border-bottom:1px solid #e8e8e4;">${q.empresa||'—'}</td>
       </tr>
+      ${q.tel?`<tr>
+        <td style="padding:7px 14px;background:#f8f8f6;font-size:11px;font-weight:600;color:#3D4A38;border-bottom:1px solid #e8e8e4;">Teléfono de contacto</td>
+        <td style="padding:7px 14px;font-size:12px;border-bottom:1px solid #e8e8e4;">${q.tel}</td>
+      </tr>`:''}
       <tr>
-        <td style="padding:7px 14px;background:#f8f8f6;font-size:11px;font-weight:600;color:#3D4A38;border-bottom:1px solid #e8e8e4;">Dirección</td>
+        <td style="padding:7px 14px;background:#f8f8f6;font-size:11px;font-weight:600;color:#3D4A38;border-bottom:1px solid #e8e8e4;">Dirección (Empresa)</td>
         <td style="padding:7px 14px;font-size:12px;border-bottom:1px solid #e8e8e4;">${q.ciudad||'—'}</td>
+      </tr>
+      <tr>
+        <td style="padding:7px 14px;background:#f8f8f6;font-size:11px;font-weight:600;color:#3D4A38;border-bottom:1px solid #e8e8e4;">Dirección (Proyecto)</td>
+        <td style="padding:7px 14px;font-size:12px;font-weight:600;border-bottom:1px solid #e8e8e4;">${q.proyecto||'—'}</td>
       </tr>
       ${q.email?`<tr><td style="padding:7px 14px;background:#f8f8f6;font-size:11px;font-weight:600;color:#3D4A38;">Correo</td><td style="padding:7px 14px;font-size:12px;">${q.email}</td></tr>`:''}
     </table>
@@ -916,6 +926,8 @@ function updPrev(){
     empresa:V('c-empresa')||'[Empresa cliente]',
     contacto:V('c-contacto')||'',
     ciudad:V('c-ciudad')||'',
+    tel:V('c-tel')||'',
+    proyecto:V('c-proyecto')||'',
     email:V('c-email')||'',
     items,subtotal:sub,ivaAmt,total,iva,
     vigencia:V('c-vigencia')||'30 días naturales',
@@ -925,7 +937,7 @@ function updPrev(){
   };
   document.getElementById('pdf-preview').innerHTML=`<div style="transform:scale(0.52);transform-origin:top left;width:192%;overflow:hidden;">${buildCotHTML(q,true)}</div>`;
 }
-function limpiarCot(){['c-empresa','c-contacto','c-ciudad','c-email','c-notas'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('items-container').innerHTML='';cotItems=[];addItem();updPrev();}
+function limpiarCot(){['c-empresa','c-contacto','c-tel','c-ciudad','c-proyecto','c-email','c-notas'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('items-container').innerHTML='';cotItems=[];addItem();updPrev();}
 
 function guardarCot(){
   const empresa=V('c-empresa').trim();const items=getItems();
@@ -937,7 +949,7 @@ function guardarCot(){
   const newEntry={id:Math.max(0,...pipeline.map(x=>x.id))+1,mes:new Date().toLocaleString('es-MX',{month:'long'}).toUpperCase(),nombre:V('c-contacto').trim(),empresa,zona:V('c-zona')||'Baja California',no_cot:noCot,material:items.map(i=>i.desc).join(', ').substring(0,40),monto:Math.round(total*100)/100,comprado:0,estatus:'En seguimiento',ganable,razon:ganable?'':(V('c-razon')||'Fuera de región'),comentario:'Generada desde cotizador'};
   pipeline.push(newEntry);
   gsAdd(newEntry);
-  const q={id:Date.now(),no_cot:noCot,empresa,contacto:V('c-contacto'),ciudad:V('c-ciudad'),email:V('c-email'),items,subtotal:sub,ivaAmt:sub*iva,total,iva,vigencia:V('c-vigencia'),pago:V('c-pago'),entrega:V('c-entrega'),notas:V('c-notas'),ganable,zona:V('c-zona'),fecha:new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'2-digit'})};
+  const q={id:Date.now(),no_cot:noCot,empresa,contacto:V('c-contacto'),tel:V('c-tel'),ciudad:V('c-ciudad'),proyecto:V('c-proyecto'),email:V('c-email'),items,subtotal:sub,ivaAmt:sub*iva,total,iva,vigencia:V('c-vigencia'),pago:V('c-pago'),entrega:V('c-entrega'),notas:V('c-notas'),ganable,zona:V('c-zona'),fecha:new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'2-digit'})};
   quotes.push(q);saveQ();cotNum++;
   toast('Cotización guardada y agregada al pipeline');imprimirCot(q);
 }
