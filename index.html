@@ -176,6 +176,7 @@ tr:hover td{background:#fafaf8;}
 .sq-item:hover{border-color:var(--m);}
 .empty{text-align:center;padding:40px 20px;color:var(--tx3);}
 .empty p:first-child{font-size:28px;margin-bottom:8px;}
+select.active-filter{border-color:var(--lime)!important;background:var(--ml)!important;font-weight:600;}
 
 /* PAGE HEADERS */
 .ph{padding:16px 24px 0;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
@@ -231,9 +232,34 @@ tr:hover td{background:#fafaf8;}
       <button class="fbtn"    data-f="perdidas"    onclick="setFP(this)">Perdidas</button>
     </div>
     <div class="fright">
-      <div class="srch"><span class="srch-ic">⌕</span><input id="srch-p" type="text" placeholder="Buscar..." oninput="renderPipeline()"></div>
+      <div class="srch"><span class="srch-ic">⌕</span><input id="srch-p" type="text" placeholder="Buscar empresa, material..." oninput="renderPipeline()"></div>
+      <button onclick="limpiarFiltros()" style="font-size:11px;padding:4px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:transparent;color:var(--tx2);cursor:pointer;" id="btn-clear-filters" title="Limpiar filtros de columna">✕ Limpiar filtros</button>
       <span class="cnt" id="cnt-p"></span>
     </div>
+  </div>
+  <div id="col-filters-row" style="display:flex;gap:8px;padding:6px 24px 0;flex-shrink:0;flex-wrap:wrap;align-items:center;">
+    <span style="font-size:11px;color:var(--tx3);font-weight:500;">Filtrar por:</span>
+    <select id="cf-zona" onchange="colFilters.zona=this.value;this.classList.toggle('active-filter',!!this.value);renderPipeline()" style="font-size:12px;padding:4px 8px;border:1px solid var(--bd2);border-radius:var(--r);background:var(--sur);color:var(--tx);cursor:pointer;">
+      <option value="">Zona (todas)</option>
+      <option value="Baja California">Baja California</option>
+      <option value="Los Cabos / BCS">Los Cabos / BCS</option>
+      <option value="Otro estado">Fuera de región</option>
+    </select>
+    <select id="cf-estatus" onchange="colFilters.estatus=this.value;this.classList.toggle('active-filter',!!this.value);renderPipeline()" style="font-size:12px;padding:4px 8px;border:1px solid var(--bd2);border-radius:var(--r);background:var(--sur);color:var(--tx);cursor:pointer;">
+      <option value="">Estatus (todos)</option>
+      <option value="En seguimiento">En seguimiento</option>
+      <option value="Ganada">Ganada</option>
+      <option value="Perdida">Perdida</option>
+    </select>
+    <select id="cf-ganable" onchange="colFilters.ganable=this.value;this.classList.toggle('active-filter',!!this.value);renderPipeline()" style="font-size:12px;padding:4px 8px;border:1px solid var(--bd2);border-radius:var(--r);background:var(--sur);color:var(--tx);cursor:pointer;">
+      <option value="">Ganable (todos)</option>
+      <option value="si">Sí — ganable</option>
+      <option value="no">No — licitación/especificada</option>
+    </select>
+    <select id="cf-mes" onchange="colFilters.mes=this.value;this.classList.toggle('active-filter',!!this.value);renderPipeline()" style="font-size:12px;padding:4px 8px;border:1px solid var(--bd2);border-radius:var(--r);background:var(--sur);color:var(--tx);cursor:pointer;">
+      <option value="">Mes (todos)</option>
+      <option>ENERO</option><option>FEBRERO</option><option>MARZO</option><option>ABRIL</option><option>MAYO</option>
+    </select>
   </div>
   <div class="tbl-scroll" id="tbl-pipeline">
     <table>
@@ -410,6 +436,7 @@ const RAW = [{"id": 1, "mes": "ENERO", "nombre": "Geraldo Vega", "empresa": "Gru
 
 let pipeline=[], quotes=[], editId=null, cotItems=[], cotNum=1;
 let fpFiltro='todas', fpSort='mes', fpDir='asc';
+let colFilters={zona:'',estatus:'',ganable:'',mes:''};
 let faZona='todas_z', faLic='todas_l', faSort='mes', faDir='asc';
 
 function init(){
@@ -529,34 +556,55 @@ function srt(arr,col,dir){return arr.slice().sort((a,b)=>{let va=a[col],vb=b[col
 
 // ---- PIPELINE PAGE ----
 function renderPipelineMetrics(){
-  const ga=pipeline.filter(r=>r.ganable&&r.estatus==='En seguimiento');
-  const gd=pipeline.filter(r=>r.ganable&&r.estatus==='Ganada');
-  const tot=pipeline.reduce((s,r)=>s+r.monto,0);
+  const view=getPFiltered();
+  const isFiltered=colFilters.zona||colFilters.estatus||colFilters.ganable||colFilters.mes||fpFiltro!=='todas';
+  const base=isFiltered?view:pipeline;
+  const ga=base.filter(r=>r.ganable&&r.estatus==='En seguimiento');
+  const gd=base.filter(r=>r.ganable&&r.estatus==='Ganada');
+  const tot=base.reduce((s,r)=>s+r.monto,0);
   const gan=ga.reduce((s,r)=>s+r.monto,0);
   const vend=gd.reduce((s,r)=>s+(r.comprado||0),0);
   const n=ga.length+gd.length;
   const tasa=n>0?Math.round(gd.length/n*100):0;
-  const fueraList=pipeline.filter(r=>r.zona==='Otro estado');
+  const fueraList=base.filter(r=>r.zona==='Otro estado');
   const fueraVend=fueraList.filter(r=>r.estatus==='Ganada');
-  const vendTotal=pipeline.filter(r=>r.estatus==='Ganada').reduce((s,r)=>s+(r.comprado||0),0);
+  const vendTotal=base.filter(r=>r.estatus==='Ganada').reduce((s,r)=>s+(r.comprado||0),0);
+  const label=isFiltered?` <span style="font-size:10px;color:var(--lime);font-weight:600;">(filtrado)</span>`:'';
   document.getElementById('metrics-pipeline').innerHTML=`
-    <div class="metric accent"><div class="mlb">Pipeline real (BC)</div><div class="mvl hi">${fmt(gan)}</div><div class="msub">${ga.length} abiertas ganables</div></div>
-    <div class="metric"><div class="mlb">Pipeline total</div><div class="mvl dim">${fmt(tot)}</div><div class="msub">todas las regiones</div></div>
-    <div class="metric"><div class="mlb">Ventas BC</div><div class="mvl">${fmt(vend)}</div><div class="msub">${gd.length} cierres en región</div></div>
-    <div class="metric"><div class="mlb">Ventas fuera región</div><div class="mvl">${fmt(fueraVend.reduce((s,r)=>s+(r.comprado||0),0))}</div><div class="msub">${fueraVend.length} cierres fuera</div></div>
-    <div class="metric"><div class="mlb">Venta total</div><div class="mvl">${fmt(vendTotal)}</div><div class="msub">BC + fuera de región</div></div>`;
+    <div class="metric accent"><div class="mlb">Pipeline ganable BC${label}</div><div class="mvl hi">${fmt(gan)}</div><div class="msub">${ga.length} abiertas ganables</div></div>
+    <div class="metric"><div class="mlb">Monto cotizado${label}</div><div class="mvl dim">${fmt(tot)}</div><div class="msub">${base.length} cotizaciones</div></div>
+    <div class="metric"><div class="mlb">Ventas BC${label}</div><div class="mvl">${fmt(vend)}</div><div class="msub">${gd.length} cierres en región</div></div>
+    <div class="metric"><div class="mlb">Ventas fuera región${label}</div><div class="mvl">${fmt(fueraVend.reduce((s,r)=>s+(r.comprado||0),0))}</div><div class="msub">${fueraVend.length} cierres fuera</div></div>
+    <div class="metric"><div class="mlb">Venta total${label}</div><div class="mvl">${fmt(vendTotal)}</div><div class="msub">BC + fuera de región</div></div>`;
 }
 
 function getPFiltered(){
   const q=(document.getElementById('srch-p')||{}).value||'';
   let rows=pipeline.filter(r=>{
     if(q&&![r.empresa,r.nombre,r.no_cot,r.material].some(s=>(s||'').toLowerCase().includes(q.toLowerCase())))return false;
-    if(fpFiltro==='seguimiento')return r.estatus==='En seguimiento';
-    if(fpFiltro==='ganadas')return r.estatus==='Ganada';
-    if(fpFiltro==='perdidas')return r.estatus==='Perdida';
+    if(fpFiltro==='seguimiento'&&r.estatus!=='En seguimiento')return false;
+    if(fpFiltro==='ganadas'&&r.estatus!=='Ganada')return false;
+    if(fpFiltro==='perdidas'&&r.estatus!=='Perdida')return false;
+    if(colFilters.zona&&r.zona!==colFilters.zona)return false;
+    if(colFilters.estatus&&r.estatus!==colFilters.estatus)return false;
+    if(colFilters.ganable==='si'&&!r.ganable)return false;
+    if(colFilters.ganable==='no'&&r.ganable)return false;
+    if(colFilters.mes&&r.mes!==colFilters.mes)return false;
     return true;
   });
   return srt(rows,fpSort,fpDir);
+}
+
+function limpiarFiltros(){
+  colFilters={zona:'',estatus:'',ganable:'',mes:''};
+  ['cf-zona','cf-estatus','cf-ganable','cf-mes'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){el.value='';el.classList.remove('active-filter');}
+  });
+  fpFiltro='todas';
+  document.querySelectorAll('#filters-pipeline .fbtn').forEach(b=>b.classList.remove('on'));
+  document.querySelector('#filters-pipeline .fbtn[data-f="todas"]').classList.add('on');
+  renderPipeline();
 }
 
 function renderPipeline(){
