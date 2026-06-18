@@ -489,15 +489,15 @@ tr:hover td{background:rgba(61,74,56,.04) !important;}
     <table>
       <thead><tr>
         <th style="width:8px;padding:0;" title="Semáforo"></th>
-        <th style="width:170px" onclick="sortP('empresa')">Empresa</th>
-        <th style="width:88px;text-align:right" onclick="sortP('monto')">Monto</th>
-        <th style="width:80px" onclick="sortP('ultimo_contacto')">Último contacto</th>
-        <th style="width:80px" onclick="sortP('estatus')">Estatus</th>
-        <th style="width:60px" onclick="sortP('moneda')">Moneda</th>
-        <th style="width:75px" onclick="sortP('fecha')">Fecha cot.</th>
-        <th style="width:65px" onclick="sortP('mes')">Mes</th>
-        <th style="width:80px" onclick="sortP('zona')">Zona</th>
-        <th style="width:68px" onclick="sortP('no_cot')">Folio</th>
+        <th style="width:170px" onclick="sortP('empresa')" id="th-empresa">Empresa</th>
+        <th style="width:88px;text-align:right" onclick="sortP('monto')" id="th-monto">Monto</th>
+        <th style="width:80px" onclick="sortP('ultimo_contacto')" id="th-ultimo_contacto">Último contacto</th>
+        <th style="width:80px" onclick="sortP('estatus')" id="th-estatus">Estatus</th>
+        <th style="width:60px" onclick="sortP('moneda')" id="th-moneda">Moneda</th>
+        <th style="width:75px" onclick="sortP('fecha')" id="th-fecha">Fecha cot. ↓</th>
+        <th style="width:65px" onclick="sortP('mes')" id="th-mes">Mes</th>
+        <th style="width:80px" onclick="sortP('zona')" id="th-zona">Zona</th>
+        <th style="width:68px" onclick="sortP('no_cot')" id="th-no_cot">Folio</th>
         <th style="width:90px">Acciones</th>
       </tr></thead>
       <tbody id="tbody-p"></tbody>
@@ -705,7 +705,7 @@ function nextFolio(){
   return 'C-' + (max + 1);
 }
 const BANXICO_TOKEN='5d56e3d89f294695d87a307835e6d36d5c49d428e44a1d44c9f36547f4ccd840';
-let fpFiltro='todas', fpSort='mes', fpDir='asc';
+let fpFiltro='todas', fpSort='fecha', fpDir='desc';
 let colFilters={zona:'',estatus:'',ganable:'',mes:'',moneda:'',semaforo:''};
 let faZona='todas_z', faLic='todas_l', faSort='mes', faDir='asc';
 
@@ -951,7 +951,20 @@ function rowBorderColor(r){
   return sem==='green'?'#1a7a4a':sem==='yellow'?'#d4a017':sem==='red'?'#b02020':'#ccc';
 }
 
-function srt(arr,col,dir){return arr.slice().sort((a,b)=>{let va=a[col],vb=b[col];if(col==='mes'){va=mIdx(va);vb=mIdx(vb);}if(col==='monto'){va=+va;vb=+vb;}if(typeof va==='string')va=va.toLowerCase();if(typeof vb==='string')vb=vb.toLowerCase();return dir==='asc'?(va<vb?-1:va>vb?1:0):(va<vb?1:va>vb?-1:0);});}
+function parseFecha(s){
+  if(!s) return 0;
+  const p=s.split('/');
+  if(p.length===3) return parseInt(p[2])*10000+parseInt(p[1])*100+parseInt(p[0]);
+  return 0;
+}
+function srt(arr,col,dir){return arr.slice().sort((a,b)=>{
+  let va,vb;
+  if(col==='mes'){va=mIdx(a.mes);vb=mIdx(b.mes);}
+  else if(col==='fecha'||col==='ultimo_contacto'){va=parseFecha(a[col]);vb=parseFecha(b[col]);}
+  else if(col==='monto'){va=+(a[col]||0);vb=+(b[col]||0);}
+  else{va=(a[col]||'').toLowerCase();vb=(b[col]||'').toLowerCase();}
+  return dir==='asc'?(va<vb?-1:va>vb?1:0):(va<vb?1:va>vb?-1:0);
+});}
 
 // ---- PIPELINE PAGE ----
 function renderPipelineMetrics(){
@@ -1045,6 +1058,12 @@ function renderPipeline(){
   renderPipelineMetrics();
   const rows=getPFiltered();
   document.getElementById('cnt-p').textContent=rows.length+' de '+pipeline.length;
+  // Update sort indicator
+  document.querySelectorAll('thead th').forEach(th=>{
+    th.textContent=th.textContent.replace(' ↑','').replace(' ↓','');
+  });
+  const activeTh=document.getElementById('th-'+fpSort);
+  if(activeTh) activeTh.textContent+=(fpDir==='desc'?' ↓':' ↑');
   const eb=e=>{const m={'Ganada':'bg-g','En seguimiento':'bg-b','Perdida':'bg-r'};return`<span class="badge ${m[e]||'bg-gr'}">${e==='En seguimiento'?'Seguim.':e}</span>`;};
   const gb=r=>r.ganable?'<span class="badge bg-m">Sí</span>':`<span class="badge bg-gr" title="${r.razon||''}">No</span>`;
   const zs=z=>z==='Baja California'?'BC':z==='Los Cabos / BCS'?'Los Cabos':'Otro';
