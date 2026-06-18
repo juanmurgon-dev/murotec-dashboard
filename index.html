@@ -394,6 +394,36 @@ tr:hover td{background:rgba(61,74,56,.04) !important;}
 }
 .toast.show{opacity:1;transform:translateY(0);}
 
+/* ── BITÁCORA ─────────────────────────────── */
+.bitacora-wrap{margin-top:16px;border-top:1px solid var(--bd);padding-top:14px;}
+.bitacora-title{font-size:9px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;}
+.bitacora-input-row{display:flex;gap:6px;margin-bottom:12px;}
+.bitacora-input{
+  flex:1;padding:7px 10px;
+  border:1px solid var(--bd2);border-radius:var(--r);
+  font-family:'Inter',sans-serif;font-size:12px;color:var(--tx);
+  background:var(--sur);resize:none;min-height:60px;
+  line-height:1.4;
+}
+.bitacora-input:focus{outline:none;border-color:var(--m);background:#fff;}
+.btn-add-nota{
+  background:var(--m);color:#fff;border:none;
+  padding:6px 12px;border-radius:var(--r);font-size:11px;font-weight:600;
+  align-self:flex-end;white-space:nowrap;
+}
+.btn-add-nota:hover{background:var(--md);}
+.bitacora-list{display:flex;flex-direction:column;gap:0;}
+.bitacora-entry{
+  padding:8px 0;border-bottom:1px solid var(--bd);
+  display:flex;flex-direction:column;gap:3px;
+}
+.bitacora-entry:last-child{border-bottom:none;}
+.bitacora-meta{display:flex;align-items:center;gap:6px;}
+.bitacora-fecha{font-size:9.5px;color:var(--tx3);font-weight:600;font-variant-numeric:tabular-nums;}
+.bitacora-autor{font-size:9px;color:var(--lime2);font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
+.bitacora-texto{font-size:12px;color:var(--tx2);line-height:1.4;white-space:pre-wrap;}
+.bitacora-empty{font-size:11px;color:var(--tx3);font-style:italic;padding:8px 0;}
+
 /* ── PRINT ────────────────────────────────── */
 #print-area{display:none;}
 @media print{
@@ -836,6 +866,11 @@ async function fetchPipeline(){
           const iso=raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
           if(iso) return iso[3]+'/'+iso[2]+'/'+iso[1];
           return raw;
+        })(),
+        bitacora: (()=>{
+          const raw=(r.bitacora||'').toString().trim();
+          if(!raw) return [];
+          try{ return JSON.parse(raw); }catch(e){ return []; }
         })()
       }));
       // Validar que los datos tengan contenido real (al menos empresa o no_cot)
@@ -886,14 +921,16 @@ function saveQ(){localStorage.setItem(SK_Q,JSON.stringify(quotes));}
 async function gsAdd(r){
   try{
     showLoading(true);
-    await fetch(GS_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'add',...r})});
+    const payload={...r,bitacora:JSON.stringify(r.bitacora||[])};
+    await fetch(GS_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'add',...payload})});
     showLoading(false);
   }catch(e){showError('Error al guardar en Sheets');}
 }
 async function gsUpdate(r){
   try{
     showLoading(true);
-    await fetch(GS_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'update',...r})});
+    const payload={...r,bitacora:JSON.stringify(r.bitacora||[])};
+    await fetch(GS_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'update',...payload})});
     showLoading(false);
   }catch(e){showError('Error al actualizar en Sheets');}
 }
@@ -1192,7 +1229,16 @@ function verDetalle(id){
     +'<div class="df"><label>Contacto</label><p>'+(r.nombre||'—')+'</p></div>'
     +'<div class="df"><label>Material</label><p class="muted">'+(r.material||'—')+'</p></div>'
     +'<div class="df"><label>Zona</label><p class="muted">'+r.zona+'</p></div>'
-    +(r.comentario?'<div class="df"><label>Notas</label><p class="muted" style="white-space:pre-wrap;font-size:11px;line-height:1.5">'+r.comentario+'</p></div>':'');
+    +(r.comentario?'<div class="df"><label>Nota original</label><p class="muted" style="white-space:pre-wrap;font-size:11px;line-height:1.5">'+r.comentario+'</p></div>':'')
+    +'<div class="bitacora-wrap">'
+    +'<div class="bitacora-title">Bitácora de seguimiento</div>'
+    +'<div class="bitacora-input-row">'
+    +'<textarea class="bitacora-input" id="nota-input-'+r.id+'" placeholder="Escribe tu nota de hoy..."></textarea>'
+    +'</div>'
+    +'<button class="btn-add-nota" onclick="agregarNota('+r.id+')">+ Agregar nota</button>'
+    +'<div style="height:12px;"></div>'
+    +'<div id="bitacora-list-'+r.id+'">'+renderBitacora(r.bitacora||[])+'</div>'
+    +'</div>';
   const actEl=document.getElementById('panel-actions');
   if(actEl)actEl.innerHTML=r.estatus==='En seguimiento'
     ?'<button class="btn-p" style="background:var(--grn);width:100%;padding:9px;" onclick="registrarContactoHoy('+r.id+')">✓ Contacté hoy</button>'
@@ -1227,7 +1273,7 @@ function guardarPipeline(){
   const fechaFmt=fechaRaw?new Date(fechaRaw+'T00:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'}):'';
   const ucRaw=document.getElementById('f-ultimo-contacto').value;
   const ucFmt=ucRaw?new Date(ucRaw+'T00:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'}):'';
-  const obj={id:editId||(Math.max(0,...pipeline.map(x=>x.id))+1),mes:document.getElementById('f-mes').value,fecha:fechaFmt,nombre:document.getElementById('f-nombre').value.trim(),empresa,zona:document.getElementById('f-zona').value,no_cot:document.getElementById('f-nocot').value.trim()||'NUEVA',material:document.getElementById('f-material').value.trim(),moneda:(document.getElementById('f-moneda')||{value:'MXN'}).value||'MXN',ultimo_contacto:ucFmt,monto,comprado:parseFloat(document.getElementById('f-comprado').value)||0,estatus:document.getElementById('f-estatus').value,ganable,razon:ganable?'':(document.getElementById('f-razon').value||'Fuera de región'),comentario:document.getElementById('f-comentario').value.trim()};
+  const obj={id:editId||(Math.max(0,...pipeline.map(x=>x.id))+1),mes:document.getElementById('f-mes').value,fecha:fechaFmt,nombre:document.getElementById('f-nombre').value.trim(),empresa,zona:document.getElementById('f-zona').value,no_cot:document.getElementById('f-nocot').value.trim()||'NUEVA',material:document.getElementById('f-material').value.trim(),moneda:(document.getElementById('f-moneda')||{value:'MXN'}).value||'MXN',ultimo_contacto:ucFmt,monto,comprado:parseFloat(document.getElementById('f-comprado').value)||0,estatus:document.getElementById('f-estatus').value,ganable,razon:ganable?'':(document.getElementById('f-razon').value||'Fuera de región'),comentario:document.getElementById('f-comentario').value.trim(),bitacora:(pipeline.find(x=>x.id===editId)||{}).bitacora||[]};
   if(editId){const i=pipeline.findIndex(x=>x.id===editId);if(i>-1){pipeline[i]=obj;gsUpdate(obj);}else{pipeline.push(obj);gsAdd(obj);}}else{pipeline.push(obj);gsAdd(obj);}
   renderPipeline();renderAnalisisMetrics();renderAnalisis();cModal();toast(editId?'Actualizada':'Agregada al pipeline');editId=null;
 }
@@ -1446,7 +1492,7 @@ function guardarCot(){
   document.getElementById('c-error').textContent='';
   const iva=parseFloat(V('c-iva')||0.16);const sub=items.reduce((s,i)=>s+i.cant*i.precio,0);const total=sub*(1+iva);
   const noCot=V('c-folio')||nextFolio();const ganable=V('c-ganable')==='si';
-  const newEntry={id:Math.max(0,...pipeline.map(x=>x.id))+1,mes:new Date().toLocaleString('es-MX',{month:'long'}).toUpperCase(),nombre:V('c-contacto').trim(),empresa,zona:V('c-zona')||'Baja California',no_cot:noCot,material:items.map(i=>i.desc).join(', ').substring(0,40),monto:Math.round(total*100)/100,comprado:0,estatus:'En seguimiento',ganable,razon:ganable?'':(V('c-razon')||'Fuera de región'),comentario:'Generada desde cotizador'};
+  const newEntry={id:Math.max(0,...pipeline.map(x=>x.id))+1,mes:new Date().toLocaleString('es-MX',{month:'long'}).toUpperCase(),nombre:V('c-contacto').trim(),empresa,zona:V('c-zona')||'Baja California',no_cot:noCot,material:items.map(i=>i.desc).join(', ').substring(0,40),monto:Math.round(total*100)/100,comprado:0,estatus:'En seguimiento',ganable,razon:ganable?'':(V('c-razon')||'Fuera de región'),comentario:'Generada desde cotizador',bitacora:[]};
   pipeline.push(newEntry);
   gsAdd(newEntry);
   const monedaSel=V('c-moneda')||'MXN';const fechaCotSel=(()=>{const f=V('c-fechacot');return f?new Date(f+'T00:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'}):new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'});})();
@@ -1488,6 +1534,37 @@ function renderSQ(){
   el.innerHTML=quotes.slice().reverse().map(q=>`<div class="sq-item"><div><p style="font-size:13px;font-weight:500">${q.no_cot} — ${q.empresa}</p><p style="font-size:11px;color:var(--tx2)">${q.fecha} · ${fmtF(q.total)} · ${q.items.length} producto${q.items.length!==1?'s':''}</p></div><div style="display:flex;gap:6px;flex-shrink:0"><button class="bsm bed" onclick='imprimirCot(${JSON.stringify(q).replace(/'/g,"&#39;")})'>↓ PDF</button><button class="bsm bdl" onclick="delQ(${q.id})">×</button></div></div>`).join('');
 }
 function delQ(id){if(!confirm('¿Eliminar?'))return;quotes=quotes.filter(q=>q.id!==id);saveQ();renderSQ();toast('Eliminada');}
+
+function renderBitacora(notas){
+  if(!notas||!notas.length) return '<p class="bitacora-empty">Sin notas de seguimiento aún.</p>';
+  return notas.slice().reverse().map(n=>`
+    <div class="bitacora-entry">
+      <div class="bitacora-meta">
+        <span class="bitacora-fecha">${n.fecha}</span>
+        <span class="bitacora-autor">· Juan Murillo</span>
+      </div>
+      <div class="bitacora-texto">${n.texto}</div>
+    </div>`).join('');
+}
+
+function agregarNota(id){
+  const r=pipeline.find(x=>x.id===id);if(!r)return;
+  const input=document.getElementById('nota-input-'+id);
+  if(!input)return;
+  const texto=input.value.trim();
+  if(!texto)return;
+  if(!r.bitacora)r.bitacora=[];
+  const ahora=new Date();
+  const fecha=ahora.toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'})+' '+ahora.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+  r.bitacora.push({fecha,texto});
+  // Update bitacora in Sheets via gsUpdate
+  gsUpdate(r);
+  // Clear input and refresh list
+  input.value='';
+  const listEl=document.getElementById('bitacora-list-'+id);
+  if(listEl)listEl.innerHTML=renderBitacora(r.bitacora);
+  toast('Nota agregada');
+}
 
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
 
