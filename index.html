@@ -135,9 +135,9 @@ tr:hover td{background:#fafaf8;}
 .card-hdr{background:var(--m);padding:12px 16px;}
 .card-hdr h3{color:#fff;font-size:13px;font-weight:600;letter-spacing:.5px;}
 .card-body{padding:16px;}
-.item-hdr{display:grid;grid-template-columns:1fr 70px 90px 90px 28px;gap:6px;margin-bottom:4px;}
+.item-hdr{display:grid;grid-template-columns:2fr 80px 70px 90px 90px 28px;gap:6px;margin-bottom:4px;}
 .item-hdr span{font-size:10px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;}
-.item-row{display:grid;grid-template-columns:1fr 70px 90px 90px 28px;gap:6px;align-items:end;margin-bottom:6px;}
+.item-row{display:grid;grid-template-columns:2fr 80px 70px 90px 90px 28px;gap:6px;align-items:end;margin-bottom:6px;}
 .item-row input{padding:7px 8px;border:1px solid var(--bd2);border-radius:var(--r);font-family:inherit;font-size:12px;color:var(--tx);width:100%;}
 .item-row input:focus{outline:none;border-color:var(--m);}
 .btn-rm{background:none;border:none;color:var(--tx3);font-size:16px;cursor:pointer;padding:6px 4px;}
@@ -260,6 +260,11 @@ select.active-filter{border-color:var(--lime)!important;background:var(--ml)!imp
       <option value="">Mes (todos)</option>
       <option>ENERO</option><option>FEBRERO</option><option>MARZO</option><option>ABRIL</option><option>MAYO</option>
     </select>
+    <select id="cf-moneda" onchange="colFilters.moneda=this.value;this.classList.toggle('active-filter',!!this.value);renderPipeline()" style="font-size:12px;padding:4px 8px;border:1px solid var(--bd2);border-radius:var(--r);background:var(--sur);color:var(--tx);cursor:pointer;">
+      <option value="">Moneda (todas)</option>
+      <option value="MXN">MXN — Pesos</option>
+      <option value="USD">USD — Dólares</option>
+    </select>
   </div>
   <div class="tbl-scroll" id="tbl-pipeline">
     <table>
@@ -270,6 +275,7 @@ select.active-filter{border-color:var(--lime)!important;background:var(--ml)!imp
         <th style="width:88px"  onclick="sortP('monto')">Monto</th>
         <th style="width:65px"  onclick="sortP('mes')">Mes</th>
         <th style="width:90px"  onclick="sortP('fecha')">Fecha</th>
+        <th style="width:60px"  onclick="sortP('moneda')">Moneda</th>
         <th style="width:110px" onclick="sortP('zona')">Zona</th>
         <th style="width:100px" onclick="sortP('estatus')">Estatus</th>
         <th style="width:68px">Ganable</th>
@@ -336,6 +342,14 @@ select.active-filter{border-color:var(--lime)!important;background:var(--ml)!imp
           <div class="card-hdr"><h3>Datos del cliente</h3></div>
           <div class="card-body">
             <div class="fgrid">
+              <div class="fg"><label>No. de Folio</label><input id="c-folio" type="text" placeholder="ej. C-4661" oninput="updPrev()"></div>
+              <div class="fg"><label>Fecha de cotización</label><input id="c-fechacot" type="date" oninput="updPrev()"></div>
+              <div class="fg full"><label>Moneda</label>
+                <select id="c-moneda" onchange="updPrev()" style="font-weight:600;">
+                  <option value="MXN">🇲🇽 Pesos Mexicanos (MXN)</option>
+                  <option value="USD">🇺🇸 Dólares Americanos (USD)</option>
+                </select>
+              </div>
               <div class="fg full"><label>Empresa / razón social *</label><input id="c-empresa" type="text" placeholder="Nombre de la empresa" oninput="updPrev()"></div>
               <div class="fg full"><label>Nombre del contacto</label><input id="c-contacto" type="text" placeholder="Ing. / Arq. Nombre" oninput="updPrev()"></div>
               <div class="fg"><label>Teléfono de contacto</label><input id="c-tel" type="text" placeholder="ej. 664 123 4567" oninput="updPrev()"></div>
@@ -351,7 +365,7 @@ select.active-filter{border-color:var(--lime)!important;background:var(--ml)!imp
         <div class="card">
           <div class="card-hdr"><h3>Productos / servicios</h3></div>
           <div class="card-body">
-            <div class="item-hdr"><span>Descripción</span><span>Cant.</span><span>Precio unit.</span><span>Total</span><span></span></div>
+            <div class="item-hdr"><span style="grid-column:span 2">Descripción</span><span>Unidad</span><span>Cant.</span><span>Precio unit.</span><span>Total</span><span></span></div>
             <div id="items-container"></div>
             <button onclick="addItem()" style="background:var(--ml);border:1px dashed var(--m);color:var(--m);border-radius:var(--r);padding:6px 14px;font-size:12px;font-weight:500;width:100%;margin-top:4px;">+ Agregar producto</button>
           </div>
@@ -401,6 +415,7 @@ select.active-filter{border-color:var(--lime)!important;background:var(--ml)!imp
         <div class="fg full"><label>Empresa *</label><input id="f-empresa" type="text" placeholder="Nombre de la empresa"></div>
         <div class="fg full"><label>Contacto</label><input id="f-nombre" type="text" placeholder="Ing. / Arq. Nombre"></div>
         <div class="fg"><label>Material / producto</label><input id="f-material" type="text" placeholder="ej. TRM 550"></div>
+        <div class="fg"><label>Moneda</label><select id="f-moneda"><option value="MXN">MXN — Pesos</option><option value="USD">USD — Dólares</option></select></div>
         <div class="fg"><label>Monto cotizado (MXN c/IVA) *</label><input id="f-monto" type="number" step="0.01" placeholder="0.00"></div>
         <div class="fg"><label>Monto comprado (s/IVA)</label><input id="f-comprado" type="number" step="0.01" placeholder="0.00"></div>
         <div class="fg"><label>Zona</label><select id="f-zona"><option>Baja California</option><option>Los Cabos / BCS</option><option>Otro estado</option></select></div>
@@ -440,7 +455,7 @@ const RAW = [{"id": 1, "mes": "ENERO", "fecha": "02/01/2026", "nombre": "Geraldo
 
 let pipeline=[], quotes=[], editId=null, cotItems=[], cotNum=1;
 let fpFiltro='todas', fpSort='mes', fpDir='asc';
-let colFilters={zona:'',estatus:'',ganable:'',mes:''};
+let colFilters={zona:'',estatus:'',ganable:'',mes:'',moneda:''};
 let faZona='todas_z', faLic='todas_l', faSort='mes', faDir='asc';
 
 function init(){
@@ -594,6 +609,7 @@ function getPFiltered(){
     if(colFilters.ganable==='si'&&!r.ganable)return false;
     if(colFilters.ganable==='no'&&r.ganable)return false;
     if(colFilters.mes&&r.mes!==colFilters.mes)return false;
+    if(colFilters.moneda&&(r.moneda||'MXN')!==colFilters.moneda)return false;
     return true;
   });
   return srt(rows,fpSort,fpDir);
@@ -601,7 +617,7 @@ function getPFiltered(){
 
 function limpiarFiltros(){
   colFilters={zona:'',estatus:'',ganable:'',mes:''};
-  ['cf-zona','cf-estatus','cf-ganable','cf-mes'].forEach(id=>{
+  ['cf-zona','cf-estatus','cf-ganable','cf-mes','cf-moneda'].forEach(id=>{
     const el=document.getElementById(id);
     if(el){el.value='';el.classList.remove('active-filter');}
   });
@@ -625,6 +641,7 @@ function renderPipeline(){
     <td style="font-weight:500;text-align:right">${fmt(r.monto)}</td>
     <td style="color:var(--tx2)">${(r.mes||'').substring(0,3)}</td>
     <td style="color:var(--tx3);font-size:11px">${r.fecha||'—'}</td>
+    <td>${r.moneda==='USD'?'<span class="badge bg-a">USD</span>':'<span class="badge bg-b">MXN</span>'}</td>
     <td style="color:var(--tx2);font-size:11px">${zs(r.zona)}</td>
     <td>${eb(r.estatus)}</td>
     <td>${gb(r)}</td>
@@ -730,7 +747,7 @@ function clrForm(){['f-nocot','f-empresa','f-nombre','f-material','f-monto','f-c
 function abrirNuevo(){editId=null;clrForm();document.getElementById('mtitle').textContent='Agregar al pipeline';document.getElementById('ovl').classList.add('on');}
 function abrirEditar(id){
   const r=pipeline.find(x=>x.id===id);if(!r)return;editId=id;clrForm();
-  document.getElementById('f-nocot').value=r.no_cot||'';document.getElementById('f-empresa').value=r.empresa||'';document.getElementById('f-nombre').value=r.nombre||'';document.getElementById('f-material').value=r.material||'';document.getElementById('f-monto').value=r.monto||'';document.getElementById('f-comprado').value=r.comprado||'';document.getElementById('f-mes').value=r.mes||'ENERO';document.getElementById('f-zona').value=r.zona||'Baja California';document.getElementById('f-estatus').value=r.estatus||'En seguimiento';document.getElementById('f-ganable').value=r.ganable?'si':'no';document.getElementById('f-razon-wrap').style.display=r.ganable?'none':'block';if(r.razon)document.getElementById('f-razon').value=r.razon;document.getElementById('f-comentario').value=r.comentario||'';
+  document.getElementById('f-nocot').value=r.no_cot||'';document.getElementById('f-empresa').value=r.empresa||'';document.getElementById('f-nombre').value=r.nombre||'';document.getElementById('f-material').value=r.material||'';document.getElementById('f-monto').value=r.monto||'';document.getElementById('f-comprado').value=r.comprado||'';document.getElementById('f-mes').value=r.mes||'ENERO';document.getElementById('f-zona').value=r.zona||'Baja California';document.getElementById('f-estatus').value=r.estatus||'En seguimiento';document.getElementById('f-ganable').value=r.ganable?'si':'no';document.getElementById('f-razon-wrap').style.display=r.ganable?'none':'block';if(r.razon)document.getElementById('f-razon').value=r.razon;const _fm=document.getElementById('f-moneda');if(_fm)_fm.value=r.moneda||'MXN';document.getElementById('f-comentario').value=r.comentario||'';
   if(r.fecha){const p=r.fecha.split('/');if(p.length===3){const fd=document.getElementById('f-fecha');if(fd)fd.value=p[2]+'-'+p[1]+'-'+p[0];}}
   document.getElementById('mtitle').textContent='Editar — '+r.no_cot;document.getElementById('ovl').classList.add('on');
 }
@@ -742,7 +759,7 @@ function guardarPipeline(){
   const ganable=document.getElementById('f-ganable').value==='si';
   const fechaRaw=document.getElementById('f-fecha').value;
   const fechaFmt=fechaRaw?new Date(fechaRaw+'T00:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'}):'';
-  const obj={id:editId||(Math.max(0,...pipeline.map(x=>x.id))+1),mes:document.getElementById('f-mes').value,fecha:fechaFmt,nombre:document.getElementById('f-nombre').value.trim(),empresa,zona:document.getElementById('f-zona').value,no_cot:document.getElementById('f-nocot').value.trim()||'NUEVA',material:document.getElementById('f-material').value.trim(),monto,comprado:parseFloat(document.getElementById('f-comprado').value)||0,estatus:document.getElementById('f-estatus').value,ganable,razon:ganable?'':(document.getElementById('f-razon').value||'Fuera de región'),comentario:document.getElementById('f-comentario').value.trim()};
+  const obj={id:editId||(Math.max(0,...pipeline.map(x=>x.id))+1),mes:document.getElementById('f-mes').value,fecha:fechaFmt,nombre:document.getElementById('f-nombre').value.trim(),empresa,zona:document.getElementById('f-zona').value,no_cot:document.getElementById('f-nocot').value.trim()||'NUEVA',material:document.getElementById('f-material').value.trim(),moneda:(document.getElementById('f-moneda')||{value:'MXN'}).value||'MXN',monto,comprado:parseFloat(document.getElementById('f-comprado').value)||0,estatus:document.getElementById('f-estatus').value,ganable,razon:ganable?'':(document.getElementById('f-razon').value||'Fuera de región'),comentario:document.getElementById('f-comentario').value.trim()};
   if(editId){const i=pipeline.findIndex(x=>x.id===editId);if(i>-1){pipeline[i]=obj;gsUpdate(obj);}else{pipeline.push(obj);gsAdd(obj);}}else{pipeline.push(obj);gsAdd(obj);}
   renderPipeline();renderAnalisisMetrics();renderAnalisis();cModal();toast(editId?'Actualizada':'Agregada al pipeline');editId=null;
 }
@@ -760,9 +777,9 @@ function togCRazon(){document.getElementById('c-razon-wrap').style.display=docum
 function V(id){const el=document.getElementById(id);return el?el.value:'';}
 
 function addItem(){
-  const idx=cotItems.length;cotItems.push({desc:'',cant:1,precio:0});
+  const idx=cotItems.length;cotItems.push({desc:'',cant:1,precio:0,unidad:'m2'});
   const div=document.createElement('div');div.className='item-row';div.id='ir-'+idx;
-  div.innerHTML=`<input type="text" placeholder="Descripción del producto o servicio" oninput="cotItems[${idx}].desc=this.value;updPrev()"><input type="number" value="1" min="1" step="1" oninput="cotItems[${idx}].cant=+this.value;updPrev()"><input type="number" placeholder="0.00" min="0" step="0.01" oninput="cotItems[${idx}].precio=+this.value;updPrev()"><input type="text" id="it-${idx}" value="$0.00" readonly style="background:var(--sur2);font-weight:500;"><button class="btn-rm" onclick="rmItem(${idx})">×</button>`;
+  div.innerHTML=`<input type="text" placeholder="Descripción del producto o servicio" oninput="cotItems[${idx}].desc=this.value;updPrev()" style="grid-column:span 2;"><select oninput="cotItems[${idx}].unidad=this.value;updPrev()" onchange="cotItems[${idx}].unidad=this.value;updPrev()" style="padding:7px 6px;border:1px solid var(--bd2);border-radius:var(--r);font-size:12px;color:var(--tx);"><option value="m2">m2</option><option value="ml">ml</option><option value="kg">kg</option><option value="rollo">rollo</option><option value="pieza">pieza</option><option value="ton">ton</option><option value="global">global</option><option value="servicio">servicio</option></select><input type="number" value="1" min="1" step="any" oninput="cotItems[${idx}].cant=+this.value;updPrev()"><input type="number" placeholder="0.00" min="0" step="0.01" oninput="cotItems[${idx}].precio=+this.value;updPrev()"><input type="text" id="it-${idx}" value="$0.00" readonly style="background:var(--sur2);font-weight:500;"><button class="btn-rm" onclick="rmItem(${idx})">×</button>`;
   document.getElementById('items-container').appendChild(div);updPrev();
 }
 function rmItem(idx){const el=document.getElementById('ir-'+idx);if(el)el.remove();cotItems[idx]=null;updPrev();}
@@ -778,39 +795,44 @@ function buildCotHTML(q, preview=false){
   const scale = preview ? 'transform:scale(0.58);transform-origin:top left;width:172%;' : '';
   const wrap = preview ? 'overflow:hidden;height:480px;' : '';
 
+  const moneda = q.moneda || 'MXN';
+  const sym = moneda === 'USD' ? 'USD $' : '$';
+  const fmtM = n => sym + (n||0).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});
   const filas = items.length ? items.map((item,i)=>`
     <tr>
-      <td style="padding:6px 10px;border-bottom:1px solid #e8e8e4;font-size:${preview?'10':'12'}px;color:#3D4A38;font-weight:600;">1.${i+1}</td>
       <td style="padding:6px 10px;border-bottom:1px solid #e8e8e4;font-size:${preview?'10':'12'}px;">${item.desc||'—'}</td>
-      <td style="padding:6px 10px;border-bottom:1px solid #e8e8e4;font-size:${preview?'10':'12'}px;text-align:center;">m2</td>
+      <td style="padding:6px 10px;border-bottom:1px solid #e8e8e4;font-size:${preview?'10':'12'}px;text-align:center;">${item.unidad||'m2'}</td>
       <td style="padding:6px 10px;border-bottom:1px solid #e8e8e4;font-size:${preview?'10':'12'}px;text-align:right;">${item.cant}</td>
-      <td style="padding:6px 10px;border-bottom:1px solid #e8e8e4;font-size:${preview?'10':'12'}px;text-align:right;">${fmtF(item.precio)}</td>
-      <td style="padding:6px 10px;border-bottom:1px solid #e8e8e4;font-size:${preview?'10':'12'}px;text-align:right;font-weight:500;">${fmtF(item.cant*item.precio)}</td>
+      <td style="padding:6px 10px;border-bottom:1px solid #e8e8e4;font-size:${preview?'10':'12'}px;text-align:right;">${fmtM(item.precio)}</td>
+      <td style="padding:6px 10px;border-bottom:1px solid #e8e8e4;font-size:${preview?'10':'12'}px;text-align:right;font-weight:500;">${fmtM(item.cant*item.precio)}</td>
     </tr>`).join('') 
-    : `<tr><td colspan="6" style="padding:12px;text-align:center;color:#aaa;font-size:11px;">Agrega productos para ver el detalle</td></tr>`;
+    : `<tr><td colspan="5" style="padding:12px;text-align:center;color:#aaa;font-size:11px;">Agrega productos para ver el detalle</td></tr>`;
 
-  return `<div style="${scale}font-family:Arial,sans-serif;color:#333;background:#fff;">
+  return `<div style="${scale}font-family:Arial,sans-serif;color:#333;background:#fff;max-width:${preview?'100%':'750px'};margin:${preview?'0':'0 auto'};padding:${preview?'0':'0'};">
 
     <!-- HEADER -->
-    <div style="background:#3D4A38;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;">
+    <div style="background:#3D4A38 !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;">
       <div style="display:flex;align-items:center;gap:16px;">
         <span style="color:#fff;font-size:20px;font-weight:900;letter-spacing:2px;">MUROTEC®</span>
         <div style="height:28px;width:1px;background:rgba(255,255,255,.3);"></div>
         <span style="color:#8DC63F;font-size:11px;letter-spacing:1.5px;font-weight:600;">REFORZAMOS EL FUTURO</span>
       </div>
-      <div style="display:flex;gap:0;border:1px solid rgba(255,255,255,.3);border-radius:4px;overflow:hidden;">
-        <div style="padding:6px 14px;background:rgba(255,255,255,.1);">
-          <div style="font-size:9px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.08em;">Folio</div>
-          <div style="font-size:13px;font-weight:800;color:#fff;">${q.no_cot||'—'}</div>
-        </div>
-        <div style="width:1px;background:rgba(255,255,255,.3);"></div>
-        <div style="padding:6px 14px;background:rgba(255,255,255,.1);">
-          <div style="font-size:9px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.08em;">Fecha</div>
-          <div style="font-size:13px;font-weight:800;color:#fff;">${q.fecha||new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'2-digit'})}</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        ${q.moneda==='USD'?`<div style="padding:4px 10px;background:rgba(141,198,63,.25);border-radius:4px;border:1px solid rgba(141,198,63,.5);"><span style="color:#8DC63F;font-size:10px;font-weight:700;letter-spacing:.5px;">USD $</span></div>`:`<div style="padding:4px 10px;background:rgba(141,198,63,.25);border-radius:4px;border:1px solid rgba(141,198,63,.5);"><span style="color:#8DC63F;font-size:10px;font-weight:700;letter-spacing:.5px;">MXN $</span></div>`}
+        <div style="display:flex;gap:0;border:1px solid rgba(255,255,255,.3);border-radius:4px;overflow:hidden;">
+          <div style="padding:6px 14px;background:rgba(255,255,255,.1);">
+            <div style="font-size:9px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.08em;">Folio</div>
+            <div style="font-size:13px;font-weight:800;color:#fff;">${q.no_cot||'—'}</div>
+          </div>
+          <div style="width:1px;background:rgba(255,255,255,.3);"></div>
+          <div style="padding:6px 14px;background:rgba(255,255,255,.1);">
+            <div style="font-size:9px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.08em;">Fecha</div>
+            <div style="font-size:13px;font-weight:800;color:#fff;">${q.fecha||new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'})}</div>
+          </div>
         </div>
       </div>
     </div>
-    <div style="height:3px;background:#8DC63F;"></div>
+    <div style="height:3px;background:#8DC63F !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;"></div>
 
     <!-- CLIENT INFO TABLE -->
     <table style="width:100%;border-collapse:collapse;border:1px solid #ddd;border-top:none;">
@@ -838,45 +860,41 @@ function buildCotHTML(q, preview=false){
     </table>
 
     <!-- COTIZACION HEADER -->
-    <div style="background:#3D4A38;padding:8px 14px;margin-top:16px;">
+    <div style="background:#3D4A38 !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:8px 14px;margin-top:16px;">
       <span style="color:#fff;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">C O T I Z A C I Ó N</span>
     </div>
 
     <!-- ITEMS TABLE -->
     <table style="width:100%;border-collapse:collapse;border:1px solid #ddd;border-top:none;">
       <thead>
-        <tr style="background:#3D4A38;">
-          <th style="padding:8px 10px;font-size:10px;font-weight:600;color:#fff;text-align:left;letter-spacing:.05em;width:50px;">Clave</th>
+        <tr style="background:#3D4A38 !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
           <th style="padding:8px 10px;font-size:10px;font-weight:600;color:#fff;text-align:left;letter-spacing:.05em;">Concepto</th>
           <th style="padding:8px 10px;font-size:10px;font-weight:600;color:#fff;text-align:center;letter-spacing:.05em;width:55px;">Unidad</th>
           <th style="padding:8px 10px;font-size:10px;font-weight:600;color:#fff;text-align:right;letter-spacing:.05em;width:65px;">Cantidad</th>
-          <th style="padding:8px 10px;font-size:10px;font-weight:600;color:#fff;text-align:right;letter-spacing:.05em;width:80px;">P.U.</th>
-          <th style="padding:8px 10px;font-size:10px;font-weight:600;color:#fff;text-align:right;letter-spacing:.05em;width:90px;">Importe</th>
-        </tr>
-        <tr style="background:#4a5a44;">
-          <td style="padding:6px 10px;font-size:11px;font-weight:700;color:#fff;" colspan="6">1&nbsp;&nbsp;&nbsp;Material</td>
+          <th style="padding:8px 10px;font-size:10px;font-weight:600;color:#fff;text-align:right;letter-spacing:.05em;width:90px;">P.U.</th>
+          <th style="padding:8px 10px;font-size:10px;font-weight:600;color:#fff;text-align:right;letter-spacing:.05em;width:100px;">Importe</th>
         </tr>
       </thead>
       <tbody>${filas}</tbody>
       <tfoot>
         <tr>
-          <td colspan="5" style="padding:6px 10px;text-align:right;font-size:11px;font-weight:600;border-top:1px solid #ddd;border-bottom:1px solid #e8e8e4;">Subtotal</td>
-          <td style="padding:6px 10px;text-align:right;font-size:11px;font-weight:500;border-top:1px solid #ddd;border-bottom:1px solid #e8e8e4;">${fmtF(sub)}</td>
+          <td colspan="4" style="padding:6px 10px;text-align:right;font-size:11px;font-weight:600;border-top:1px solid #ddd;border-bottom:1px solid #e8e8e4;">Subtotal</td>
+          <td style="padding:6px 10px;text-align:right;font-size:11px;font-weight:500;border-top:1px solid #ddd;border-bottom:1px solid #e8e8e4;">${fmtM(sub)}</td>
         </tr>
         ${iva>0?`<tr>
-          <td colspan="5" style="padding:6px 10px;text-align:right;font-size:11px;font-weight:600;border-bottom:1px solid #e8e8e4;">IVA (${Math.round(iva*100)}%)</td>
-          <td style="padding:6px 10px;text-align:right;font-size:11px;font-weight:500;border-bottom:1px solid #e8e8e4;">${fmtF(ivaAmt)}</td>
+          <td colspan="4" style="padding:6px 10px;text-align:right;font-size:11px;font-weight:600;border-bottom:1px solid #e8e8e4;">IVA (${Math.round(iva*100)}%)</td>
+          <td style="padding:6px 10px;text-align:right;font-size:11px;font-weight:500;border-bottom:1px solid #e8e8e4;">${fmtM(ivaAmt)}</td>
         </tr>`:''}
-        <tr style="background:#3D4A38;">
-          <td colspan="5" style="padding:8px 10px;text-align:right;font-size:12px;font-weight:700;color:#fff;">Total (Pesos)</td>
-          <td style="padding:8px 10px;text-align:right;font-size:12px;font-weight:700;color:#8DC63F;">${fmtF(total)}</td>
+        <tr style="background:#3D4A38 !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
+          <td colspan="4" style="padding:8px 10px;text-align:right;font-size:12px;font-weight:700;color:#fff;">Total (${moneda==='USD'?'Dólares USD':'Pesos MXN'})</td>
+          <td style="padding:8px 10px;text-align:right;font-size:12px;font-weight:700;color:#8DC63F;">${fmtM(total)}</td>
         </tr>
       </tfoot>
     </table>
 
     <!-- NOTES -->
     ${q.notas?`<div style="margin-top:16px;border:1px solid #8DC63F;border-radius:4px;overflow:hidden;">
-      <div style="background:#8DC63F;padding:6px 14px;">
+      <div style="background:#8DC63F !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:6px 14px;">
         <span style="font-size:11px;font-weight:700;color:#fff;letter-spacing:.5px;">Notas</span>
       </div>
       <div style="padding:10px 14px;background:#f5fcea;font-size:10px;color:#2d4a1e;line-height:1.7;white-space:pre-wrap;">${q.notas}</div>
@@ -905,7 +923,7 @@ function buildCotHTML(q, preview=false){
     </div>
 
     <!-- FOOTER -->
-    <div style="background:#3D4A38;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;">
+    <div style="background:#3D4A38 !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;">
       <span style="color:#fff;font-size:14px;font-weight:900;letter-spacing:2px;">MUROTEC®</span>
       <div style="display:flex;gap:16px;align-items:center;">
         <span style="color:rgba(255,255,255,.7);font-size:10px;">✉ juanmurgon@murotecmx.com</span>
@@ -921,8 +939,9 @@ function updPrev(){
   cotItems.forEach((item,idx)=>{if(!item)return;const t=document.getElementById('it-'+idx);if(t)t.value=fmtF(item.cant*item.precio);});
   const sub=items.reduce((s,i)=>s+i.cant*i.precio,0);const ivaAmt=sub*iva;const total=sub+ivaAmt;
   const q={
-    no_cot:`COT-${String(cotNum).padStart(4,'0')}`,
-    fecha:new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'2-digit'}),
+    no_cot:V('c-folio')||`COT-${String(cotNum).padStart(4,'0')}`,
+    fecha:(()=>{const f=V('c-fechacot');return f?new Date(f+'T00:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'}):new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'});})(),
+    moneda:V('c-moneda')||'MXN',
     empresa:V('c-empresa')||'[Empresa cliente]',
     contacto:V('c-contacto')||'',
     ciudad:V('c-ciudad')||'',
@@ -937,7 +956,7 @@ function updPrev(){
   };
   document.getElementById('pdf-preview').innerHTML=`<div style="transform:scale(0.52);transform-origin:top left;width:192%;overflow:hidden;">${buildCotHTML(q,true)}</div>`;
 }
-function limpiarCot(){['c-empresa','c-contacto','c-tel','c-ciudad','c-proyecto','c-email','c-notas'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('items-container').innerHTML='';cotItems=[];addItem();updPrev();}
+function limpiarCot(){['c-folio','c-empresa','c-contacto','c-tel','c-ciudad','c-proyecto','c-email','c-notas'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('items-container').innerHTML='';cotItems=[];const _mn=document.getElementById('c-moneda');if(_mn)_mn.value='MXN';const _fc=document.getElementById('c-fechacot');if(_fc)_fc.value='';addItem();updPrev();}
 
 function guardarCot(){
   const empresa=V('c-empresa').trim();const items=getItems();
@@ -949,14 +968,38 @@ function guardarCot(){
   const newEntry={id:Math.max(0,...pipeline.map(x=>x.id))+1,mes:new Date().toLocaleString('es-MX',{month:'long'}).toUpperCase(),nombre:V('c-contacto').trim(),empresa,zona:V('c-zona')||'Baja California',no_cot:noCot,material:items.map(i=>i.desc).join(', ').substring(0,40),monto:Math.round(total*100)/100,comprado:0,estatus:'En seguimiento',ganable,razon:ganable?'':(V('c-razon')||'Fuera de región'),comentario:'Generada desde cotizador'};
   pipeline.push(newEntry);
   gsAdd(newEntry);
-  const q={id:Date.now(),no_cot:noCot,empresa,contacto:V('c-contacto'),tel:V('c-tel'),ciudad:V('c-ciudad'),proyecto:V('c-proyecto'),email:V('c-email'),items,subtotal:sub,ivaAmt:sub*iva,total,iva,vigencia:V('c-vigencia'),pago:V('c-pago'),entrega:V('c-entrega'),notas:V('c-notas'),ganable,zona:V('c-zona'),fecha:new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'2-digit'})};
+  const monedaSel=V('c-moneda')||'MXN';const fechaCotSel=(()=>{const f=V('c-fechacot');return f?new Date(f+'T00:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'}):new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'});})();
+  const q={id:Date.now(),no_cot:V('c-folio')||noCot,moneda:monedaSel,fecha:fechaCotSel,empresa,contacto:V('c-contacto'),tel:V('c-tel'),ciudad:V('c-ciudad'),proyecto:V('c-proyecto'),email:V('c-email'),items,subtotal:sub,ivaAmt:sub*iva,total,iva,vigencia:V('c-vigencia'),pago:V('c-pago'),entrega:V('c-entrega'),notas:V('c-notas'),ganable,zona:V('c-zona'),fecha:new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'2-digit'})};
   quotes.push(q);saveQ();cotNum++;
   toast('Cotización guardada y agregada al pipeline');imprimirCot(q);
 }
 
 function imprimirCot(q){
-  document.getElementById('print-area').innerHTML=buildCotHTML(q,false);
-  setTimeout(()=>{window.print();setTimeout(()=>{document.getElementById('print-area').innerHTML='';},500);},200);
+  const html = buildCotHTML(q,false);
+  const win = window.open('','_blank','width=820,height=1060');
+  win.document.write(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Cotización ${q.no_cot||''} — MUROTEC®</title>
+  <style>
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:Arial,sans-serif; background:#fff; color:#333; }
+    @page {
+      size: letter;
+      margin: 8mm 10mm;
+    }
+    @media print {
+      body { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+      /* Hide browser auto-generated header/footer */
+      html { -webkit-print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body style="-webkit-print-color-adjust:exact;print-color-adjust:exact;">${html}</body>
+</html>`);
+  win.document.close();
+  setTimeout(()=>{ win.focus(); win.print(); }, 700);
 }
 function renderSQ(){
   const el=document.getElementById('sq-wrap');
