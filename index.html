@@ -558,33 +558,48 @@ async function fetchPipeline(){
     const res = await fetch(GS_URL);
     const data = await res.json();
     if(Array.isArray(data) && data.length > 0){
-      pipeline = data.map((r,i) => ({
+      const mapped = data.map((r,i) => ({
         id: r.id || i+1,
-        mes: r.mes || '',
-        nombre: r.nombre || '',
-        empresa: r.empresa || '',
-        domicilio: r.domicilio || '',
-        zona: r.zona || 'Otro estado',
-        no_cot: r.no_cot || '',
-        material: r.material || '',
+        mes: (r.mes || '').toString().trim(),
+        fecha: (r.fecha || '').toString().trim(),
+        nombre: (r.nombre || '').toString().trim(),
+        empresa: (r.empresa || '').toString().trim(),
+        domicilio: (r.domicilio || '').toString().trim(),
+        zona: (r.zona || 'Otro estado').toString().trim(),
+        no_cot: (r.no_cot || '').toString().trim(),
+        material: (r.material || '').toString().trim(),
         monto: parseFloat(r.monto) || 0,
         comprado: parseFloat(r.comprado) || 0,
-        estatus: r.estatus || 'En seguimiento',
-        ganable: r.ganable === 'Sí' || r.ganable === true,
-        razon: r.razon || '',
-        comentario: r.comentario || ''
+        estatus: (r.estatus || 'En seguimiento').toString().trim(),
+        ganable: r.ganable === 'Sí' || r.ganable === true || r.ganable === 'true',
+        razon: (r.razon || '').toString().trim(),
+        comentario: (r.comentario || '').toString().trim(),
+        moneda: (r.moneda || 'MXN').toString().trim()
       }));
-      gsLoaded = true;
+      // Validar que los datos tengan contenido real (al menos empresa o no_cot)
+      const validos = mapped.filter(r => r.empresa || r.no_cot);
+      if(validos.length > 0){
+        pipeline = validos;
+        gsLoaded = true;
+        console.log('Sheets OK:', pipeline.length, 'filas | USD:', pipeline.filter(r=>r.moneda==='USD').length);
+      } else {
+        // Sheet tiene filas pero vacías — usar RAW
+        console.warn('Sheets: filas vacías, usando RAW');
+        pipeline = JSON.parse(JSON.stringify(RAW));
+        uploadAllToSheet();
+      }
     } else {
-      // Sheet vacío — cargar datos iniciales
+      // Sheet vacío — subir datos iniciales
+      console.log('Sheet vacío, cargando RAW y subiendo...');
       pipeline = JSON.parse(JSON.stringify(RAW));
       if(!gsLoaded) uploadAllToSheet();
     }
   } catch(e) {
+    console.warn('Error cargando Sheets, usando RAW:', e);
     showError('Sin conexión a Google Sheets — mostrando datos locales');
     pipeline = JSON.parse(JSON.stringify(RAW));
   }
-  cotNum = pipeline.length + quotes.length + 1;
+  cotNum = Math.max(...pipeline.map(x=>x.id||0), 0) + 1;
   showLoading(false);
   renderPipeline(); renderAnalisisMetrics(); renderAnalisis();
 }
