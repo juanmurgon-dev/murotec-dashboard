@@ -508,6 +508,28 @@ const RAW = [{"id": 1, "mes": "ENERO", "fecha": "02/01/2026", "nombre": "Geraldo
 let pipeline=[], quotes=[], editId=null, cotItems=[], cotNum=1;
 let tipoCambio=17.5; // default, se actualiza automáticamente
 let tcFecha='—';
+const FOLIO_BASE = 4679; // primer folio de la serie nueva
+
+function nextFolio(){
+  // Find highest C-XXXX number in pipeline
+  let max = FOLIO_BASE - 1;
+  pipeline.forEach(r => {
+    const m = (r.no_cot||'').match(/(\d{4,5})$/);
+    if(m){
+      const n = parseInt(m[1]);
+      if(n >= FOLIO_BASE && n > max) max = n;
+    }
+  });
+  // Also check saved quotes
+  quotes.forEach(q => {
+    const m = (q.no_cot||'').match(/C-(\d{4,5})$/);
+    if(m){
+      const n = parseInt(m[1]);
+      if(n >= FOLIO_BASE && n > max) max = n;
+    }
+  });
+  return 'C-' + (max + 1);
+}
 const BANXICO_TOKEN='5d56e3d89f294695d87a307835e6d36d5c49d428e44a1d44c9f36547f4ccd840';
 let fpFiltro='todas', fpSort='mes', fpDir='asc';
 let colFilters={zona:'',estatus:'',ganable:'',mes:'',moneda:'',semaforo:''};
@@ -704,6 +726,11 @@ function gotoPage(id,btn){
   btn.classList.add('on');
   if(id==='guardadas') renderSQ();
   if(id==='analisis'){renderAnalisisMetrics();renderAnalisis();}
+  if(id==='cotizador'){
+    const folioEl=document.getElementById('c-folio');
+    if(folioEl&&!folioEl.value) folioEl.value=nextFolio();
+    updPrev();
+  }
 }
 
 // ---- FORMAT ----
@@ -1168,7 +1195,7 @@ function updPrev(){
   cotItems.forEach((item,idx)=>{if(!item)return;const t=document.getElementById('it-'+idx);if(t)t.value=fmtF(item.cant*item.precio);});
   const sub=items.reduce((s,i)=>s+i.cant*i.precio,0);const ivaAmt=sub*iva;const total=sub+ivaAmt;
   const q={
-    no_cot:V('c-folio')||`COT-${String(cotNum).padStart(4,'0')}`,
+    no_cot:V('c-folio')||nextFolio(),
     fecha:(()=>{const f=V('c-fechacot');return f?new Date(f+'T00:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'}):new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'});})(),
     moneda:V('c-moneda')||'MXN',
     empresa:V('c-empresa')||'[Empresa cliente]',
@@ -1185,7 +1212,7 @@ function updPrev(){
   };
   document.getElementById('pdf-preview').innerHTML=`<div style="transform:scale(0.52);transform-origin:top left;width:192%;overflow:hidden;">${buildCotHTML(q,true)}</div>`;
 }
-function limpiarCot(){['c-folio','c-empresa','c-contacto','c-tel','c-ciudad','c-proyecto','c-email','c-notas'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('items-container').innerHTML='';cotItems=[];const _mn=document.getElementById('c-moneda');if(_mn)_mn.value='MXN';const _fc=document.getElementById('c-fechacot');if(_fc)_fc.value='';addItem();updPrev();}
+function limpiarCot(){['c-folio','c-empresa','c-contacto','c-tel','c-ciudad','c-proyecto','c-email','c-notas'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('items-container').innerHTML='';cotItems=[];const _mn=document.getElementById('c-moneda');if(_mn)_mn.value='MXN';const _fc=document.getElementById('c-fechacot');if(_fc)_fc.value='';const _fl=document.getElementById('c-folio');if(_fl)_fl.value=nextFolio();addItem();updPrev();}
 
 function guardarCot(){
   const empresa=V('c-empresa').trim();const items=getItems();
@@ -1193,13 +1220,13 @@ function guardarCot(){
   if(!items.length){document.getElementById('c-error').textContent='Agrega al menos un producto.';return;}
   document.getElementById('c-error').textContent='';
   const iva=parseFloat(V('c-iva')||0.16);const sub=items.reduce((s,i)=>s+i.cant*i.precio,0);const total=sub*(1+iva);
-  const noCot=`COT-${String(cotNum).padStart(4,'0')}`;const ganable=V('c-ganable')==='si';
+  const noCot=V('c-folio')||nextFolio();const ganable=V('c-ganable')==='si';
   const newEntry={id:Math.max(0,...pipeline.map(x=>x.id))+1,mes:new Date().toLocaleString('es-MX',{month:'long'}).toUpperCase(),nombre:V('c-contacto').trim(),empresa,zona:V('c-zona')||'Baja California',no_cot:noCot,material:items.map(i=>i.desc).join(', ').substring(0,40),monto:Math.round(total*100)/100,comprado:0,estatus:'En seguimiento',ganable,razon:ganable?'':(V('c-razon')||'Fuera de región'),comentario:'Generada desde cotizador'};
   pipeline.push(newEntry);
   gsAdd(newEntry);
   const monedaSel=V('c-moneda')||'MXN';const fechaCotSel=(()=>{const f=V('c-fechacot');return f?new Date(f+'T00:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'}):new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'});})();
   const q={id:Date.now(),no_cot:V('c-folio')||noCot,moneda:monedaSel,fecha:fechaCotSel,empresa,contacto:V('c-contacto'),tel:V('c-tel'),ciudad:V('c-ciudad'),proyecto:V('c-proyecto'),email:V('c-email'),items,subtotal:sub,ivaAmt:sub*iva,total,iva,vigencia:V('c-vigencia'),pago:V('c-pago'),entrega:V('c-entrega'),notas:V('c-notas'),ganable,zona:V('c-zona'),fecha:new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'2-digit'})};
-  quotes.push(q);saveQ();cotNum++;
+  quotes.push(q);saveQ();
   toast('Cotización guardada y agregada al pipeline');imprimirCot(q);
 }
 
