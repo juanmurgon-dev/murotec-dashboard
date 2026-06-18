@@ -3,154 +3,189 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MUROTEC® — Dashboard</title>
+<title>MUROTEC® — Pipeline</title>
 <style>
 :root{
-  --m:#3D4A38;--md:#2a3326;--ml:#eef0ed;
-  --lime:#8DC63F;--lime2:#6fa530;
-  --bg:#f5f4f1;--sur:#ffffff;--sur2:#f0efec;
-  --bd:rgba(61,74,56,.10);--bd2:rgba(61,74,56,.20);
-  --tx:#1e2319;--tx2:#5a6456;--tx3:#9aA496;
-  --red:#b02020;--rbg:#fdeaea;
-  --grn:#1a7a4a;--gbg:#e6f5ec;
+  --m:#3D4A38;--md:#2a3326;--ml:#eef0ed;--m10:rgba(61,74,56,.1);
+  --lime:#8DC63F;--lime2:#6fa530;--lime10:rgba(141,198,63,.12);
+  --bg:#F2F1EE;--sur:#ffffff;--sur2:#f5f4f1;--sur3:#ECEAE5;
+  --bd:rgba(0,0,0,.07);--bd2:rgba(0,0,0,.13);
+  --tx:#18211A;--tx2:#556055;--tx3:#9aA496;
+  --red:#b02020;--rbg:#fdeaea;--rbg2:rgba(176,32,32,.06);
+  --grn:#1a7a4a;--gbg:#e6f5ec;--gbg2:rgba(26,122,74,.06);
   --blu:#1a5fa8;--bbg:#e8f0fa;
-  --amb:#8a5a00;--abg:#fdf3dc;
-  --r:8px;--rl:12px;
+  --amb:#7a4f00;--abg:#fdf3dc;
+  --yel:#8a5a00;--ybg:rgba(212,160,23,.08);
+  --r:6px;--rl:10px;
+  --shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.04);
+  --shadow-md:0 4px 12px rgba(0,0,0,.08),0 2px 4px rgba(0,0,0,.04);
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--tx);font-size:14px;line-height:1.5;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
-button{cursor:pointer;font-family:inherit;font-size:13px;border-radius:var(--r);transition:all .15s;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;background:var(--bg);color:var(--tx);font-size:13px;line-height:1.5;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+button{cursor:pointer;font-family:inherit;font-size:12px;border-radius:var(--r);transition:all .15s;}
 
-/* NAV */
-.nav{background:var(--m);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:52px;flex-shrink:0;}
-.nav-brand span{color:#fff;font-size:16px;font-weight:900;letter-spacing:2px;}
-.nav-tabs{display:flex;gap:2px;}
-.ntab{background:transparent;border:none;color:rgba(255,255,255,.6);padding:6px 16px;border-radius:var(--r);font-size:13px;font-weight:500;}
-.ntab:hover{color:#fff;background:rgba(255,255,255,.1);}
-.ntab.on{color:#fff;background:rgba(255,255,255,.15);border-bottom:2px solid var(--lime);}
+/* ── NAV ── */
+.nav{background:var(--m);padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:48px;flex-shrink:0;box-shadow:0 1px 0 rgba(255,255,255,.06);}
+.nav-brand span{color:#fff;font-size:14px;font-weight:900;letter-spacing:2.5px;}
+.nav-slogan{color:var(--lime);font-size:9px;font-weight:700;letter-spacing:2px;margin-left:12px;padding-left:12px;border-left:1px solid rgba(255,255,255,.2);}
+.nav-right{display:flex;align-items:center;gap:6px;}
+.nav-tabs{display:flex;gap:1px;background:rgba(0,0,0,.2);border-radius:var(--r);padding:2px;}
+.ntab{background:transparent;border:none;color:rgba(255,255,255,.55);padding:5px 13px;border-radius:4px;font-size:12px;font-weight:500;}
+.ntab:hover{color:rgba(255,255,255,.85);}
+.ntab.on{background:rgba(255,255,255,.15);color:#fff;}
+.nav-sync{background:none;border:none;color:rgba(255,255,255,.5);font-size:11px;padding:4px 8px;border-radius:var(--r);}
+.nav-sync:hover{background:rgba(255,255,255,.1);color:#fff;}
 
-/* LAYOUT */
+/* ── LAYOUT ── */
 .app-body{flex:1;overflow:hidden;display:flex;flex-direction:column;}
 .page{display:none;flex-direction:column;height:100%;overflow:hidden;}
 .page.on{display:flex;}
 
-/* METRICS BAR */
-.metrics{display:flex;gap:10px;padding:16px 24px 0;flex-shrink:0;overflow-x:auto;}
-.metric{background:var(--sur);border:1px solid var(--bd);border-radius:var(--rl);padding:12px 16px;flex-shrink:0;min-width:150px;}
-.metric.accent{border-top:3px solid var(--lime);}
-.mlb{font-size:10px;color:var(--tx2);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;}
-.mvl{font-size:20px;font-weight:700;color:var(--tx);letter-spacing:-.4px;}
+/* ── DAILY BRIEF ── */
+.daily-brief{padding:10px 20px;background:var(--m);border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0;}
+.brief-inner{display:flex;align-items:center;gap:20px;}
+.brief-stat{display:flex;align-items:center;gap:6px;}
+.brief-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.brief-dot.red{background:#e05555;}
+.brief-dot.yellow{background:#d4a017;}
+.brief-dot.green{background:var(--lime);}
+.brief-text{font-size:11px;color:rgba(255,255,255,.7);}
+.brief-text strong{color:#fff;font-weight:600;}
+.brief-divider{width:1px;height:14px;background:rgba(255,255,255,.15);}
+.brief-tc{font-size:10px;color:rgba(255,255,255,.45);margin-left:auto;}
+.brief-tc strong{color:rgba(255,255,255,.7);}
+
+/* ── METRICS ── */
+.metrics-strip{display:flex;gap:0;padding:0 20px;flex-shrink:0;border-bottom:1px solid var(--bd);background:var(--sur);}
+.mcard{padding:12px 20px;border-right:1px solid var(--bd);display:flex;flex-direction:column;gap:2px;min-width:140px;}
+.mcard:last-child{border-right:none;margin-left:auto;}
+.mcard.accent{background:var(--lime10);}
+.mcard.danger{background:var(--rbg2);}
+.mlb{font-size:9px;color:var(--tx3);font-weight:600;text-transform:uppercase;letter-spacing:.08em;}
+.mvl{font-size:18px;font-weight:700;color:var(--tx);letter-spacing:-.4px;line-height:1.2;}
 .mvl.hi{color:var(--m);}
-.mvl.dim{color:var(--tx3);}
-.msub{font-size:10px;color:var(--tx3);margin-top:2px;}
+.mvl.red{color:var(--red);}
+.mvl.amb{color:var(--amb);}
+.msub{font-size:10px;color:var(--tx3);}
 
-/* INNER TABS (for analisis page) */
-.inner-tabs{display:flex;gap:4px;padding:14px 24px 0;flex-shrink:0;}
-.itab{background:var(--sur);border:1px solid var(--bd2);color:var(--tx2);padding:5px 14px;border-radius:99px;font-size:12px;font-weight:500;}
-.itab:hover{background:var(--sur2);}
-.itab.on{background:var(--m);color:#fff;border-color:var(--m);}
-
-/* FILTERS ROW */
-.frow{display:flex;align-items:center;justify-content:space-between;padding:12px 24px 0;flex-shrink:0;flex-wrap:wrap;gap:8px;}
-.filters{display:flex;gap:6px;flex-wrap:wrap;}
-.fbtn{background:var(--sur);border:1px solid var(--bd2);color:var(--tx2);padding:4px 12px;border-radius:99px;font-size:12px;}
-.fbtn:hover{background:var(--sur2);}
-.fbtn.on{background:var(--m);color:#fff;border-color:var(--m);}
-.fright{display:flex;gap:8px;align-items:center;}
+/* ── TOOLBAR ── */
+.toolbar{display:flex;align-items:center;gap:8px;padding:10px 20px;flex-shrink:0;background:var(--sur);border-bottom:1px solid var(--bd);}
+.toolbar-left{display:flex;align-items:center;gap:6px;flex:1;flex-wrap:wrap;}
 .srch{position:relative;}
-.srch input{padding:6px 10px 6px 30px;border:1px solid var(--bd2);border-radius:var(--r);font-size:12px;width:180px;background:var(--sur);color:var(--tx);}
-.srch input:focus{outline:none;border-color:var(--m);}
-.srch-ic{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--tx3);font-size:13px;pointer-events:none;}
+.srch input{padding:6px 10px 6px 28px;border:1px solid var(--bd2);border-radius:var(--r);font-size:12px;width:180px;background:var(--bg);color:var(--tx);font-family:inherit;}
+.srch input:focus{outline:none;border-color:var(--m);background:var(--sur);}
+.srch-ic{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--tx3);font-size:12px;pointer-events:none;}
+.divider-v{width:1px;height:18px;background:var(--bd2);}
+.filter-pill{background:var(--bg);border:1px solid var(--bd2);color:var(--tx2);padding:4px 10px;border-radius:99px;font-size:11px;font-weight:500;}
+.filter-pill:hover{border-color:var(--m);color:var(--m);}
+.filter-pill.on{background:var(--m);color:#fff;border-color:var(--m);}
+.filter-pill.active-filter{border-color:var(--lime);color:var(--lime2);background:var(--lime10);}
+select.fsel{padding:4px 8px;border:1px solid var(--bd2);border-radius:var(--r);font-size:11px;background:var(--bg);color:var(--tx2);font-family:inherit;cursor:pointer;}
+select.fsel:focus{outline:none;border-color:var(--m);}
+select.fsel.active-filter{border-color:var(--lime);color:var(--lime2);background:var(--lime10);}
+.btn-clear{background:none;border:none;color:var(--tx3);font-size:11px;padding:4px 6px;}
+.btn-clear:hover{color:var(--red);}
+.toolbar-right{display:flex;align-items:center;gap:6px;flex-shrink:0;}
 .cnt{font-size:11px;color:var(--tx3);}
+.btn-p{background:var(--m);color:#fff;border:none;padding:6px 14px;font-weight:500;}
+.btn-p:hover{background:var(--md);}
+.btn-o{background:var(--sur);border:1px solid var(--bd2);color:var(--tx);padding:6px 12px;}
+.btn-o:hover{background:var(--sur2);}
+.btn-l{background:var(--lime);color:#fff;border:none;padding:6px 14px;font-weight:600;}
+.btn-l:hover{background:var(--lime2);}
+.btn-sm{font-size:11px;padding:3px 8px;border-radius:var(--r);}
+.bed{background:transparent;border:1px solid var(--bd);color:var(--blu);}
+.bed:hover{background:var(--bbg);}
+.bdl{background:transparent;border:1px solid var(--bd);color:var(--red);}
+.bdl:hover{background:var(--rbg);}
+.btn-grn{background:var(--gbg);border:1px solid rgba(26,122,74,.2);color:var(--grn);font-weight:600;padding:4px 10px;font-size:11px;}
+.btn-grn:hover{background:#d0edde;}
 
-/* SCROLLABLE TABLE */
-.tbl-scroll{flex:1;overflow-y:auto;overflow-x:auto;margin:10px 24px 16px;border:1px solid var(--bd);border-radius:var(--rl);background:var(--sur);}
-.tbl-scroll::-webkit-scrollbar{width:6px;height:6px;}
+/* ── TABLE ── */
+.tbl-scroll{flex:1;overflow-y:auto;overflow-x:auto;margin:0;background:var(--sur);}
+.tbl-scroll::-webkit-scrollbar{width:5px;height:5px;}
 .tbl-scroll::-webkit-scrollbar-track{background:transparent;}
 .tbl-scroll::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:3px;}
 table{width:100%;border-collapse:collapse;table-layout:fixed;}
 thead{position:sticky;top:0;z-index:2;}
-th{font-size:10px;font-weight:600;color:var(--tx2);text-align:left;padding:10px 12px;background:var(--sur2);border-bottom:1px solid var(--bd);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;cursor:pointer;user-select:none;}
+th{font-size:9px;font-weight:700;color:var(--tx3);text-align:left;padding:8px 12px;background:var(--sur2);border-bottom:1px solid var(--bd);text-transform:uppercase;letter-spacing:.07em;white-space:nowrap;cursor:pointer;user-select:none;}
 th:hover{color:var(--m);}
-td{padding:8px 12px;border-bottom:1px solid var(--bd);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle;}
+td{padding:0 12px;height:42px;border-bottom:1px solid var(--bd);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle;}
 tr:last-child td{border-bottom:none;}
-tr:hover td{background:#fafaf8;}
+tr.row-green td{background:var(--gbg2);}
+tr.row-yellow td{background:var(--ybg);}
+tr.row-red td{background:var(--rbg2);}
+tr:hover td{filter:brightness(.97);}
 
-/* BADGES */
-.badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 7px;border-radius:99px;white-space:nowrap;}
+/* ── BADGES ── */
+.badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 7px;border-radius:99px;white-space:nowrap;letter-spacing:.02em;}
 .bg-g{background:var(--gbg);color:var(--grn);}
 .bg-b{background:var(--bbg);color:var(--blu);}
 .bg-r{background:var(--rbg);color:var(--red);}
 .bg-a{background:var(--abg);color:var(--amb);}
-.bg-gr{background:var(--sur2);color:var(--tx2);}
+.bg-gr{background:var(--sur3);color:var(--tx2);}
 .bg-m{background:var(--ml);color:var(--m);}
+.sem-green{background:var(--gbg);color:var(--grn);font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;}
+.sem-yellow{background:#fdf0cc;color:#7a4f00;font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;}
+.sem-red{background:var(--rbg);color:var(--red);font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;}
+.sem-none{background:var(--sur3);color:var(--tx3);font-size:10px;font-weight:500;padding:2px 8px;border-radius:99px;}
 
-/* BUTTONS */
-.btn-p{background:var(--m);color:#fff;border:none;padding:7px 14px;font-weight:500;}
-.btn-p:hover{background:var(--md);}
-.btn-o{background:var(--sur);border:1px solid var(--bd2);color:var(--tx);padding:7px 14px;}
-.btn-o:hover{background:var(--sur2);}
-.btn-l{background:var(--lime);color:#fff;border:none;padding:7px 14px;font-weight:600;}
-.btn-l:hover{background:var(--lime2);}
-.bsm{font-size:11px;padding:3px 8px;}
-.bed{background:transparent;border:1px solid var(--bd);color:var(--m);}
-.bed:hover{background:var(--ml);}
-.bdl{background:transparent;border:1px solid var(--bd);color:var(--red);}
-.bdl:hover{background:var(--rbg);}
-
-/* MODAL */
-.ovl{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;align-items:center;justify-content:center;padding:20px;}
-.ovl.on{display:flex;}
-.modal{background:var(--sur);border-radius:var(--rl);width:100%;max-width:580px;max-height:90vh;overflow-y:auto;box-shadow:0 12px 40px rgba(0,0,0,.18);}
-.mhd{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;border-bottom:1px solid var(--bd);}
-.mhd h2{font-size:15px;font-weight:600;}
-.mcl{background:none;border:none;font-size:22px;color:var(--tx2);padding:0 4px;line-height:1;}
-.mbody{padding:16px 20px;}
-.mft{padding:12px 20px;border-top:1px solid var(--bd);display:flex;gap:8px;}
-
-/* SIDE PANEL */
-.pol{display:none;position:fixed;inset:0;background:rgba(0,0,0,.2);z-index:90;}
+/* ── SIDE PANEL ── */
+.pol{display:none;position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:90;}
 .pol.on{display:block;}
-.spanel{position:fixed;top:0;right:0;bottom:0;width:360px;background:var(--sur);border-left:1px solid var(--bd);z-index:91;overflow-y:auto;transform:translateX(100%);transition:transform .25s;padding:20px;}
+.spanel{position:fixed;top:0;right:0;bottom:0;width:340px;background:var(--sur);border-left:1px solid var(--bd);z-index:91;overflow-y:auto;transform:translateX(100%);transition:transform .22s ease;display:flex;flex-direction:column;}
 .spanel.on{transform:translateX(0);}
-.spc{background:none;border:none;font-size:18px;color:var(--tx2);cursor:pointer;float:right;}
+.spanel-hdr{background:var(--m);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.spanel-hdr h3{color:#fff;font-size:13px;font-weight:600;letter-spacing:.3px;}
+.spc{background:rgba(255,255,255,.15);border:none;color:#fff;font-size:14px;cursor:pointer;width:24px;height:24px;border-radius:4px;display:flex;align-items:center;justify-content:center;line-height:1;}
+.spanel-body{padding:16px;flex:1;}
 .df{margin-bottom:12px;}
-.df label{font-size:10px;color:var(--tx3);font-weight:600;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:2px;}
-.df p{font-size:13px;color:var(--tx);}
+.df label{font-size:9px;color:var(--tx3);font-weight:700;text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:3px;}
+.df p{font-size:13px;color:var(--tx);font-weight:500;}
+.df p.muted{color:var(--tx2);font-weight:400;}
+.spanel-actions{padding:12px 16px;border-top:1px solid var(--bd);display:flex;flex-direction:column;gap:8px;flex-shrink:0;}
 
-/* FORM */
-.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+/* ── MODAL ── */
+.ovl{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:center;justify-content:center;padding:20px;}
+.ovl.on{display:flex;}
+.modal{background:var(--sur);border-radius:var(--rl);width:100%;max-width:560px;max-height:92vh;overflow-y:auto;box-shadow:var(--shadow-md);}
+.mhd{display:flex;align-items:center;justify-content:space-between;padding:14px 18px 12px;border-bottom:1px solid var(--bd);}
+.mhd h2{font-size:14px;font-weight:600;}
+.mcl{background:none;border:none;font-size:20px;color:var(--tx3);padding:0 4px;line-height:1;}
+.mbody{padding:14px 18px;}
+.mft{padding:12px 18px;border-top:1px solid var(--bd);display:flex;gap:8px;}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
 .fg{display:flex;flex-direction:column;gap:4px;}
 .fg.full{grid-column:1/-1;}
-.fg label{font-size:10px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;}
-.fg input,.fg select,.fg textarea{padding:8px 10px;border:1px solid var(--bd2);border-radius:var(--r);font-family:inherit;font-size:13px;color:var(--tx);background:var(--sur);}
+.fg label{font-size:10px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;}
+.fg input,.fg select,.fg textarea{padding:7px 9px;border:1px solid var(--bd2);border-radius:var(--r);font-family:inherit;font-size:12px;color:var(--tx);background:var(--sur);}
 .fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--m);}
-.fg textarea{resize:vertical;min-height:56px;}
-.ferr{font-size:12px;color:var(--red);margin-top:6px;}
+.fg textarea{resize:vertical;min-height:54px;}
+.ferr{font-size:11px;color:var(--red);margin-top:5px;}
 
-/* COTIZADOR */
-.cot-wrap{flex:1;overflow-y:auto;padding:16px 24px;}
-.cot-layout{display:grid;grid-template-columns:1fr 320px;gap:16px;align-items:start;}
-.card{background:var(--sur);border:1px solid var(--bd);border-radius:var(--rl);overflow:hidden;margin-bottom:12px;}
-.card-hdr{background:var(--m);padding:12px 16px;}
-.card-hdr h3{color:#fff;font-size:13px;font-weight:600;letter-spacing:.5px;}
-.card-body{padding:16px;}
-.item-hdr{display:grid;grid-template-columns:2fr 80px 70px 90px 90px 28px;gap:6px;margin-bottom:4px;}
-.item-hdr span{font-size:10px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;}
-.item-row{display:grid;grid-template-columns:2fr 80px 70px 90px 90px 28px;gap:6px;align-items:end;margin-bottom:6px;}
-.item-row input{padding:7px 8px;border:1px solid var(--bd2);border-radius:var(--r);font-family:inherit;font-size:12px;color:var(--tx);width:100%;}
-.item-row input:focus{outline:none;border-color:var(--m);}
-.btn-rm{background:none;border:none;color:var(--tx3);font-size:16px;cursor:pointer;padding:6px 4px;}
+/* ── COTIZADOR ── */
+.cot-wrap{flex:1;overflow-y:auto;padding:16px 20px;}
+.cot-layout{display:grid;grid-template-columns:1fr 300px;gap:16px;align-items:start;}
+.card{background:var(--sur);border:1px solid var(--bd);border-radius:var(--rl);overflow:hidden;margin-bottom:12px;box-shadow:var(--shadow);}
+.card-hdr{background:var(--m);padding:10px 14px;}
+.card-hdr h3{color:#fff;font-size:12px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;}
+.card-body{padding:14px;}
+.item-hdr{display:grid;grid-template-columns:2fr 80px 70px 90px 90px 28px;gap:5px;margin-bottom:4px;}
+.item-hdr span{font-size:9px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;}
+.item-row{display:grid;grid-template-columns:2fr 80px 70px 90px 90px 28px;gap:5px;align-items:end;margin-bottom:6px;}
+.item-row input,.item-row select{padding:6px 7px;border:1px solid var(--bd2);border-radius:var(--r);font-family:inherit;font-size:11px;color:var(--tx);width:100%;}
+.item-row input:focus,.item-row select:focus{outline:none;border-color:var(--m);}
+.btn-rm{background:none;border:none;color:var(--tx3);font-size:15px;cursor:pointer;padding:5px 3px;}
 .btn-rm:hover{color:var(--red);}
-.prev-card{background:var(--sur);border:1px solid var(--bd);border-radius:var(--rl);overflow:hidden;position:sticky;top:0;}
-.prev-hdr{background:var(--m);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;}
-.prev-hdr span{color:#fff;font-size:11px;font-weight:600;letter-spacing:.5px;}
+.prev-card{background:var(--sur);border:1px solid var(--bd);border-radius:var(--rl);overflow:hidden;position:sticky;top:0;box-shadow:var(--shadow);}
+.prev-hdr{background:var(--m);padding:9px 12px;display:flex;align-items:center;justify-content:space-between;}
+.prev-hdr span{color:#fff;font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;}
 
-/* PDF styles */
-.pdf-hdr{background:var(--m);color:#fff;padding:14px 18px 10px;}
+/* ── PDF ── */
+.pdf-hdr{background:var(--m) !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;color:#fff;padding:14px 18px 10px;}
 .pdf-logo-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
 .pdf-brand-name{font-size:16px;font-weight:900;letter-spacing:2px;color:#fff;}
-.pdf-lime{height:2px;background:var(--lime);width:100%;}
+.pdf-lime{height:3px;background:var(--lime) !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;width:100%;}
 .pdf-contacts{display:flex;gap:14px;margin-top:7px;}
 .pdf-contacts span{font-size:10px;color:rgba(255,255,255,.7);}
 .pdf-body{padding:14px 18px;}
@@ -158,136 +193,138 @@ tr:hover td{background:#fafaf8;}
 .pdf-mb label{font-size:9px;color:var(--tx3);font-weight:600;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:1px;}
 .pdf-mb p{color:var(--tx);font-weight:500;}
 .pdf-tbl{width:100%;border-collapse:collapse;margin-bottom:10px;}
-.pdf-tbl th{background:var(--m);color:#fff;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;padding:5px 8px;text-align:left;}
+.pdf-tbl th{background:var(--m) !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;color:#fff;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;padding:5px 8px;text-align:left;}
 .pdf-tbl td{padding:5px 8px;border-bottom:1px solid var(--bd);font-size:10px;color:var(--tx);}
 .pdf-tbl .nr{text-align:right;}
 .pdf-tots{background:var(--sur2);border-radius:var(--r);padding:8px 10px;margin-bottom:10px;}
 .pdf-tr{display:flex;justify-content:space-between;font-size:10px;margin-bottom:2px;}
 .pdf-tr.tot{font-weight:700;font-size:11px;color:var(--m);padding-top:4px;border-top:1px solid var(--bd);margin-bottom:0;}
 .pdf-cond{font-size:9px;color:var(--tx2);margin-bottom:8px;}
-.pdf-cond p{margin-bottom:2px;}
 .pdf-notes{background:var(--ml);border-radius:var(--r);padding:7px 9px;font-size:9px;color:var(--m);margin-bottom:8px;}
-.pdf-footer{background:var(--m);color:rgba(255,255,255,.5);font-size:8px;text-align:center;padding:5px;letter-spacing:.5px;}
-.pdf-footer span{color:var(--lime);}
+.pdf-footer{background:var(--m) !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;color:rgba(255,255,255,.5);font-size:8px;text-align:center;padding:5px;letter-spacing:.5px;}
 
-/* SAVED QUOTES */
-.sq-wrap{flex:1;overflow-y:auto;padding:16px 24px;}
-.sq-item{background:var(--sur);border:1px solid var(--bd);border-radius:var(--r);padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;}
+/* ── GUARDADAS ── */
+.sq-wrap{flex:1;overflow-y:auto;padding:16px 20px;}
+.sq-item{background:var(--sur);border:1px solid var(--bd);border-radius:var(--r);padding:11px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:7px;box-shadow:var(--shadow);}
 .sq-item:hover{border-color:var(--m);}
-.empty{text-align:center;padding:40px 20px;color:var(--tx3);}
+.empty{text-align:center;padding:48px 20px;color:var(--tx3);}
 .empty p:first-child{font-size:28px;margin-bottom:8px;}
-select.active-filter{border-color:var(--lime)!important;background:var(--ml)!important;font-weight:600;}
+.ph{padding:12px 20px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;background:var(--sur);border-bottom:1px solid var(--bd);}
+.ph-title h1{font-size:15px;font-weight:700;}
+.ph-title p{font-size:11px;color:var(--tx2);margin-top:1px;}
 
-/* PAGE HEADERS */
-.ph{padding:16px 24px 0;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
-.ph-title h1{font-size:17px;font-weight:700;}
-.ph-title p{font-size:12px;color:var(--tx2);}
+/* ── ANALISIS ── */
+.inner-tabs{display:flex;gap:4px;padding:10px 20px;flex-shrink:0;background:var(--sur);border-bottom:1px solid var(--bd);}
+.itab{background:var(--bg);border:1px solid var(--bd2);color:var(--tx2);padding:4px 12px;border-radius:99px;font-size:11px;font-weight:500;}
+.itab:hover{border-color:var(--m);color:var(--m);}
+.itab.on{background:var(--m);color:#fff;border-color:var(--m);}
 
-/* TOAST */
-.toast{position:fixed;bottom:24px;right:24px;background:var(--m);color:#fff;padding:10px 18px;border-radius:var(--r);font-size:13px;font-weight:500;z-index:200;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;}
+/* ── TOAST ── */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--m);color:#fff;padding:9px 16px;border-radius:var(--r);font-size:12px;font-weight:500;z-index:200;opacity:0;transform:translateY(6px);transition:all .22s;pointer-events:none;box-shadow:var(--shadow-md);}
 .toast.show{opacity:1;transform:translateY(0);}
 
-/* PRINT */
+/* ── SYNC BAR ── */
+#gs-loading{font-size:11px;font-weight:600;letter-spacing:.3px;}
+
+/* ── PRINT ── */
 #print-area{display:none;}
-@media print{body>*:not(#print-area){display:none!important;}#print-area{display:block!important;}@page{margin:0;size:letter;}}
+@media print{body>*:not(#print-area){display:none!important;}#print-area{display:block!important;}@page{margin:8mm 10mm;size:letter;}body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
 
 @media(max-width:700px){
   .cot-layout{grid-template-columns:1fr;}
   .fgrid{grid-template-columns:1fr;}
   .fg.full{grid-column:1;}
   .spanel{width:100%;}
-  .metrics{flex-wrap:wrap;}
+  .metrics-strip{overflow-x:auto;}
+  .daily-brief{display:none;}
 }
 </style>
 </head>
 <body>
 
 <nav class="nav">
-  <div class="nav-brand"><span>MUROTEC®</span></div><button onclick="showLoading(true);fetchPipeline()" style="background:rgba(255,255,255,.12);border:none;color:rgba(255,255,255,.8);padding:5px 12px;border-radius:var(--r);font-size:12px;cursor:pointer;margin-left:12px;" title="Sincronizar con Google Sheets">⟳ Actualizar</button>
+  <div style="display:flex;align-items:center;">
+    <span class="nav-brand"><span>MUROTEC®</span></span>
+    <span class="nav-slogan">REFORZAMOS EL FUTURO</span>
+  </div>
   <div class="nav-tabs">
     <button class="ntab on"  onclick="gotoPage('pipeline',this)">Pipeline</button>
-    <button class="ntab"     onclick="gotoPage('analisis',this)">Análisis BC vs. Fuera</button>
-    <button class="ntab"     onclick="gotoPage('cotizador',this)">Generar cotización</button>
-    <button class="ntab"     onclick="gotoPage('guardadas',this)">Cotizaciones guardadas</button>
+    <button class="ntab"     onclick="gotoPage('analisis',this)">Análisis</button>
+    <button class="ntab"     onclick="gotoPage('cotizador',this)">Nueva cotización</button>
+    <button class="ntab"     onclick="gotoPage('guardadas',this)">Historial</button>
+  </div>
+  <div class="nav-right">
+    <button class="nav-sync" onclick="showLoading(true);fetchPipeline()" title="Sincronizar con Google Sheets">⟳ Actualizar</button>
   </div>
 </nav>
+
+<!-- Daily brief bar -->
+<div class="daily-brief" id="daily-brief">
+  <div class="brief-inner" id="brief-inner">
+    <span class="brief-text" style="color:rgba(255,255,255,.4);font-size:11px;">Cargando pipeline...</span>
+  </div>
+</div>
 
 <div class="app-body">
 
 <!-- ====== PAGE: PIPELINE ====== -->
 <div class="page on" id="page-pipeline">
-  <div class="ph">
-    <div class="ph-title"><h1>Pipeline completo 2026</h1><p>Todas las cotizaciones · Enero–Mayo 2026</p></div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn-o" onclick="exportCSV()">↓ CSV</button>
-      <button class="btn-p" onclick="abrirNuevo()">+ Nueva</button>
+  <div class="metrics-strip" id="metrics-pipeline"></div>
+
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <div class="srch"><span class="srch-ic">⌕</span><input id="srch-p" type="text" placeholder="Buscar empresa, folio, material..." oninput="renderPipeline()"></div>
+      <div class="divider-v"></div>
+      <button class="filter-pill on" data-f="todas" onclick="setFP(this)">Todas</button>
+      <button class="filter-pill" data-f="seguimiento" onclick="setFP(this)">En seguimiento</button>
+      <button class="filter-pill" data-f="ganadas" onclick="setFP(this)">Ganadas</button>
+      <button class="filter-pill" data-f="perdidas" onclick="setFP(this)">Perdidas</button>
+      <div class="divider-v"></div>
+      <select class="fsel" id="cf-zona" onchange="colFilters.zona=this.value;this.classList.toggle('active-filter',!!this.value);renderPipeline()">
+        <option value="">Zona</option>
+        <option value="Baja California">Baja California</option>
+        <option value="Los Cabos / BCS">Los Cabos</option>
+        <option value="Otro estado">Fuera de región</option>
+      </select>
+      <select class="fsel" id="cf-moneda" onchange="colFilters.moneda=this.value;this.classList.toggle('active-filter',!!this.value);renderPipeline()">
+        <option value="">Moneda</option>
+        <option value="MXN">MXN</option>
+        <option value="USD">USD</option>
+      </select>
+      <select class="fsel" id="cf-semaforo" onchange="colFilters.semaforo=this.value;this.classList.toggle('active-filter',!!this.value);renderPipeline()">
+        <option value="">Seguimiento</option>
+        <option value="green">🟢 Al día</option>
+        <option value="yellow">🟡 Pendiente</option>
+        <option value="red">🔴 Urgente</option>
+        <option value="gray">⚪ Sin registro</option>
+      </select>
+      <select class="fsel" id="cf-mes" onchange="colFilters.mes=this.value;this.classList.toggle('active-filter',!!this.value);renderPipeline()">
+        <option value="">Mes</option>
+        <option>ENERO</option><option>FEBRERO</option><option>MARZO</option><option>ABRIL</option><option>MAYO</option>
+      </select>
+      <button class="btn-clear" onclick="limpiarFiltros()" title="Limpiar filtros">✕</button>
     </div>
-  </div>
-  <div class="metrics" id="metrics-pipeline"></div>
-  <div class="frow">
-    <div class="filters" id="filters-pipeline">
-      <button class="fbtn on" data-f="todas"       onclick="setFP(this)">Todas</button>
-      <button class="fbtn"    data-f="seguimiento" onclick="setFP(this)">En seguimiento</button>
-      <button class="fbtn"    data-f="ganadas"     onclick="setFP(this)">Ganadas</button>
-      <button class="fbtn"    data-f="perdidas"    onclick="setFP(this)">Perdidas</button>
-    </div>
-    <div class="fright">
-      <div class="srch"><span class="srch-ic">⌕</span><input id="srch-p" type="text" placeholder="Buscar empresa, material..." oninput="renderPipeline()"></div>
-      <button onclick="limpiarFiltros()" style="font-size:11px;padding:4px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:transparent;color:var(--tx2);cursor:pointer;" id="btn-clear-filters" title="Limpiar filtros de columna">✕ Limpiar filtros</button>
+    <div class="toolbar-right">
       <span class="cnt" id="cnt-p"></span>
+      <button class="btn-o btn-sm" onclick="exportCSV()">↓ CSV</button>
+      <button class="btn-p btn-sm" onclick="abrirNuevo()">+ Nueva</button>
     </div>
   </div>
-  <div id="col-filters-row" style="display:flex;gap:8px;padding:6px 24px 0;flex-shrink:0;flex-wrap:wrap;align-items:center;">
-    <span style="font-size:11px;color:var(--tx3);font-weight:500;">Filtrar por:</span>
-    <select id="cf-zona" onchange="colFilters.zona=this.value;this.classList.toggle('active-filter',!!this.value);renderPipeline()" style="font-size:12px;padding:4px 8px;border:1px solid var(--bd2);border-radius:var(--r);background:var(--sur);color:var(--tx);cursor:pointer;">
-      <option value="">Zona (todas)</option>
-      <option value="Baja California">Baja California</option>
-      <option value="Los Cabos / BCS">Los Cabos / BCS</option>
-      <option value="Otro estado">Fuera de región</option>
-    </select>
-    <select id="cf-estatus" onchange="colFilters.estatus=this.value;this.classList.toggle('active-filter',!!this.value);renderPipeline()" style="font-size:12px;padding:4px 8px;border:1px solid var(--bd2);border-radius:var(--r);background:var(--sur);color:var(--tx);cursor:pointer;">
-      <option value="">Estatus (todos)</option>
-      <option value="En seguimiento">En seguimiento</option>
-      <option value="Ganada">Ganada</option>
-      <option value="Perdida">Perdida</option>
-    </select>
-    <select id="cf-ganable" onchange="colFilters.ganable=this.value;this.classList.toggle('active-filter',!!this.value);renderPipeline()" style="font-size:12px;padding:4px 8px;border:1px solid var(--bd2);border-radius:var(--r);background:var(--sur);color:var(--tx);cursor:pointer;">
-      <option value="">Ganable (todos)</option>
-      <option value="si">Sí — ganable</option>
-      <option value="no">No — licitación/especificada</option>
-    </select>
-    <select id="cf-mes" onchange="colFilters.mes=this.value;this.classList.toggle('active-filter',!!this.value);renderPipeline()" style="font-size:12px;padding:4px 8px;border:1px solid var(--bd2);border-radius:var(--r);background:var(--sur);color:var(--tx);cursor:pointer;">
-      <option value="">Mes (todos)</option>
-      <option>ENERO</option><option>FEBRERO</option><option>MARZO</option><option>ABRIL</option><option>MAYO</option>
-    </select>
-    <select id="cf-moneda" onchange="colFilters.moneda=this.value;this.classList.toggle('active-filter',!!this.value);renderPipeline()" style="font-size:12px;padding:4px 8px;border:1px solid var(--bd2);border-radius:var(--r);background:var(--sur);color:var(--tx);cursor:pointer;">
-      <option value="">Moneda (todas)</option>
-      <option value="MXN">MXN — Pesos</option>
-      <option value="USD">USD — Dólares</option>
-    </select>
-    <select id="cf-semaforo" onchange="colFilters.semaforo=this.value;this.classList.toggle('active-filter',!!this.value);renderPipeline()" style="font-size:12px;padding:4px 8px;border:1px solid var(--bd2);border-radius:var(--r);background:var(--sur);color:var(--tx);cursor:pointer;">
-      <option value="">Seguimiento (todos)</option>
-      <option value="green">🟢 Al día (0-2 días)</option>
-      <option value="yellow">🟡 Pendiente (3-5 días)</option>
-      <option value="red">🔴 Urgente (+6 días)</option>
-      <option value="gray">⚪ Sin registro</option>
-    </select>
-  </div>
-  <div class="tbl-scroll" id="tbl-pipeline">
+
+  <div class="tbl-scroll">
     <table>
       <thead><tr>
-        <th style="width:75px"  onclick="sortP('no_cot')">Cot.</th>
-        <th style="width:155px" onclick="sortP('empresa')">Empresa</th>
-        <th style="width:95px"  onclick="sortP('material')">Material</th>
-        <th style="width:88px"  onclick="sortP('monto')">Monto</th>
-        <th style="width:65px"  onclick="sortP('mes')">Mes</th>
-        <th style="width:90px"  onclick="sortP('fecha')">Fecha cot.</th>
-        <th style="width:60px"  onclick="sortP('moneda')">Moneda</th>
-        <th style="width:85px"  onclick="sortP('ultimo_contacto')">Seguimiento</th>
-        <th style="width:110px" onclick="sortP('zona')">Zona</th>
-        <th style="width:100px" onclick="sortP('estatus')">Estatus</th>
-        <th style="width:68px">Ganable</th>
-        <th style="width:82px">Acción</th>
+        <th style="width:8px;padding:0;" title="Semáforo"></th>
+        <th style="width:170px" onclick="sortP('empresa')">Empresa</th>
+        <th style="width:88px;text-align:right" onclick="sortP('monto')">Monto</th>
+        <th style="width:80px" onclick="sortP('ultimo_contacto')">Último contacto</th>
+        <th style="width:80px" onclick="sortP('estatus')">Estatus</th>
+        <th style="width:60px" onclick="sortP('moneda')">Moneda</th>
+        <th style="width:75px" onclick="sortP('fecha')">Fecha cot.</th>
+        <th style="width:65px" onclick="sortP('mes')">Mes</th>
+        <th style="width:80px" onclick="sortP('zona')">Zona</th>
+        <th style="width:68px" onclick="sortP('no_cot')">Folio</th>
+        <th style="width:90px">Acciones</th>
       </tr></thead>
       <tbody id="tbody-p"></tbody>
     </table>
@@ -297,21 +334,21 @@ select.active-filter{border-color:var(--lime)!important;background:var(--ml)!imp
 <!-- ====== PAGE: ANÁLISIS ====== -->
 <div class="page" id="page-analisis">
   <div class="ph">
-    <div class="ph-title"><h1>Análisis por región</h1><p>BC vs. fuera · segmentado por tipo de cotización</p></div>
+    <div class="ph-title"><h1>Análisis por región</h1><p>BC vs. fuera · segmentado por tipo</p></div>
   </div>
-  <div class="metrics" id="metrics-analisis"></div>
+  <div class="metrics-strip" id="metrics-analisis" style="flex-wrap:wrap;height:auto;min-height:60px;"></div>
   <div class="inner-tabs">
-    <button class="itab on" data-z="todas_z"  onclick="setZona(this)">Todas las regiones</button>
-    <button class="itab"    data-z="bc"        onclick="setZona(this)">Baja California + Los Cabos</button>
-    <button class="itab"    data-z="fuera"     onclick="setZona(this)">Fuera de región</button>
+    <button class="itab on" data-z="todas_z" onclick="setZona(this)">Todas las regiones</button>
+    <button class="itab" data-z="bc"         onclick="setZona(this)">Baja California + Los Cabos</button>
+    <button class="itab" data-z="fuera"      onclick="setZona(this)">Fuera de región</button>
   </div>
-  <div class="frow">
-    <div class="filters">
-      <button class="fbtn on" data-l="todas_l"   onclick="setLic(this)">Todas</button>
-      <button class="fbtn"    data-l="ganable"    onclick="setLic(this)">Ganables (no licitación)</button>
-      <button class="fbtn"    data-l="licitacion" onclick="setLic(this)">Licitación / especificada</button>
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <button class="filter-pill on" data-l="todas_l"   onclick="setLic(this)">Todas</button>
+      <button class="filter-pill"    data-l="ganable"    onclick="setLic(this)">Ganables</button>
+      <button class="filter-pill"    data-l="licitacion" onclick="setLic(this)">Licitación / especificada</button>
     </div>
-    <div class="fright">
+    <div class="toolbar-right">
       <div class="srch"><span class="srch-ic">⌕</span><input id="srch-a" type="text" placeholder="Buscar..." oninput="renderAnalisis()"></div>
       <span class="cnt" id="cnt-a"></span>
     </div>
@@ -319,14 +356,13 @@ select.active-filter{border-color:var(--lime)!important;background:var(--ml)!imp
   <div class="tbl-scroll">
     <table>
       <thead><tr>
-        <th style="width:75px"  onclick="sortA('no_cot')">Cot.</th>
-        <th style="width:155px" onclick="sortA('empresa')">Empresa</th>
-        <th style="width:95px"  onclick="sortA('material')">Material</th>
-        <th style="width:88px"  onclick="sortA('monto')">Monto</th>
-        <th style="width:65px"  onclick="sortA('mes')">Mes</th>
-        <th style="width:115px" onclick="sortA('zona')">Zona</th>
-        <th style="width:100px" onclick="sortA('estatus')">Estatus</th>
-        <th style="width:115px">Tipo</th>
+        <th style="width:8px;padding:0;"></th>
+        <th style="width:160px" onclick="sortA('empresa')">Empresa</th>
+        <th style="width:88px;text-align:right" onclick="sortA('monto')">Monto</th>
+        <th style="width:65px" onclick="sortA('mes')">Mes</th>
+        <th style="width:100px" onclick="sortA('zona')">Zona</th>
+        <th style="width:90px" onclick="sortA('estatus')">Estatus</th>
+        <th style="width:110px">Tipo</th>
         <th style="width:68px">Acción</th>
       </tr></thead>
       <tbody id="tbody-a"></tbody>
@@ -410,6 +446,7 @@ select.active-filter{border-color:var(--lime)!important;background:var(--ml)!imp
 </div>
 
 </div><!-- /app-body -->
+</div><!-- /app-body -->
 
 <!-- MODAL -->
 <div class="ovl" id="ovl" onclick="cModal(event)">
@@ -445,13 +482,19 @@ select.active-filter{border-color:var(--lime)!important;background:var(--ml)!imp
 <!-- SIDE PANEL -->
 <div class="pol" id="pol" onclick="cPanel()"></div>
 <div class="spanel" id="spanel">
-  <button class="spc" onclick="cPanel()">×</button>
-  <div id="panel-content"></div>
+  <div class="spanel-hdr">
+    <h3>Detalle</h3>
+    <button class="spc" onclick="cPanel()">×</button>
+  </div>
+  <div class="spanel-body" id="panel-content"></div>
+  <div class="spanel-actions" id="panel-actions"></div>
 </div>
 
 <div class="toast" id="toast"></div>
 <div id="print-area"></div>
 
+<div class="toast" id="toast"></div>
+<div id="print-area"></div>
 <script>
 const SK_Q='murotec_quotes_v1';
 const GS_URL='https://script.google.com/macros/s/AKfycby0aZxRtcOP3yZKnAeguSrN8mR03tyalD9SK1FzOEgRp6kHVqegHfc3BEfiF0yZtWpQQw/exec';
@@ -712,30 +755,39 @@ function srt(arr,col,dir){return arr.slice().sort((a,b)=>{let va=a[col],vb=b[col
 // ---- PIPELINE PAGE ----
 function renderPipelineMetrics(){
   const view=getPFiltered();
-  const isFiltered=colFilters.zona||colFilters.estatus||colFilters.ganable||colFilters.mes||colFilters.moneda||fpFiltro!=='todas';
+  const isFiltered=colFilters.zona||colFilters.estatus||colFilters.ganable||colFilters.mes||colFilters.moneda||colFilters.semaforo||fpFiltro!=='todas';
   const base=isFiltered?view:pipeline;
   const ga=base.filter(r=>r.ganable&&r.estatus==='En seguimiento');
   const gd=base.filter(r=>r.ganable&&r.estatus==='Ganada');
-  const fueraList=base.filter(r=>r.zona==='Otro estado');
-  const fueraVend=fueraList.filter(r=>r.estatus==='Ganada');
-  const vendTotal=base.filter(r=>r.estatus==='Ganada').reduce((s,r)=>s+(r.comprado||0),0);
+  const fueraVend=base.filter(r=>r.zona==='Otro estado'&&r.estatus==='Ganada');
+  const totMXN=base.filter(r=>(r.moneda||'MXN')==='MXN').reduce((s,r)=>s+r.monto,0);
+  const totUSD=base.filter(r=>r.moneda==='USD').reduce((s,r)=>s+r.monto,0);
+  const totGen=totMXN+(totUSD*tipoCambio);
+  const rojos=base.filter(r=>r.estatus==='En seguimiento'&&semaforoColor(r)==='red').length;
+  const label=isFiltered?' <span style="font-size:9px;color:var(--lime);font-weight:700;">(filtrado)</span>':'';
+  document.getElementById('metrics-pipeline').innerHTML=
+    '<div class="mcard accent"><div class="mlb">Pipeline ganable BC'+label+'</div><div class="mvl hi">'+fmt(ga.reduce((s,r)=>s+r.monto,0))+'</div><div class="msub">'+ga.length+' cotizaciones abiertas</div></div>'+
+    '<div class="mcard"><div class="mlb">Total MXN'+label+'</div><div class="mvl" style="color:var(--m)">'+fmt(totMXN)+'</div><div class="msub">'+base.filter(r=>(r.moneda||'MXN')==='MXN').length+' cotizaciones</div></div>'+
+    '<div class="mcard"><div class="mlb">Total USD'+label+'</div><div class="mvl amb">$'+totUSD.toLocaleString('es-MX',{maximumFractionDigits:0})+'</div><div class="msub">'+base.filter(r=>r.moneda==='USD').length+' cotizaciones USD</div></div>'+
+    '<div class="mcard accent" style="border-top-color:var(--lime)"><div class="mlb">Total general equiv. MXN'+label+'</div><div class="mvl hi">'+fmt(totGen)+'</div><div class="msub" style="font-size:9px;">TC FIX $'+tipoCambio.toFixed(2)+' · '+tcFecha+'</div></div>'+
+    '<div class="mcard"><div class="mlb">Ventas cerradas'+label+'</div><div class="mvl">'+fmt(gd.reduce((s,r)=>s+(r.comprado||0),0)+fueraVend.reduce((s,r)=>s+(r.comprado||0),0))+'</div><div class="msub">'+gd.length+' BC · '+fueraVend.length+' fuera</div></div>'+
+    (rojos>0?'<div class="mcard danger"><div class="mlb">Acción inmediata</div><div class="mvl red">'+rojos+'</div><div class="msub">+6 días sin contacto</div></div>':'');
+  updateDailyBrief(base);
+}
 
-  // Totales por moneda (todo el pipeline, no solo ganables)
-  const totMXN = base.filter(r=>(r.moneda||'MXN')==='MXN').reduce((s,r)=>s+r.monto,0);
-  const totUSD = base.filter(r=>r.moneda==='USD').reduce((s,r)=>s+r.monto,0);
-  const totGeneral = totMXN + (totUSD * tipoCambio);
-
-  const label=isFiltered?` <span style="font-size:10px;color:var(--lime);font-weight:600;">(filtrado)</span>`:'';
-  const tcLabel=`<span style="font-size:9px;color:var(--tx3);">TC FIX: $${tipoCambio.toFixed(2)} · ${tcFecha}</span>`;
-
-  document.getElementById('metrics-pipeline').innerHTML=`
-    <div class="metric accent"><div class="mlb">Pipeline ganable BC${label}</div><div class="mvl hi">${fmt(base.filter(r=>r.ganable&&r.estatus==='En seguimiento').reduce((s,r)=>s+r.monto,0))}</div><div class="msub">${ga.length} abiertas ganables</div></div>
-    <div class="metric"><div class="mlb">Total cotizado MXN${label}</div><div class="mvl" style="color:var(--m)">${fmt(totMXN)}</div><div class="msub">${base.filter(r=>(r.moneda||'MXN')==='MXN').length} cotizaciones en pesos</div></div>
-    <div class="metric"><div class="mlb">Total cotizado USD${label}</div><div class="mvl" style="color:var(--amb)">${'USD $'+totUSD.toLocaleString('es-MX',{minimumFractionDigits:0,maximumFractionDigits:0})}</div><div class="msub">${base.filter(r=>r.moneda==='USD').length} cotizaciones en dólares</div></div>
-    <div class="metric accent" style="border-top-color:var(--lime)"><div class="mlb">Total general (equiv. MXN)${label}</div><div class="mvl hi">${fmt(totGeneral)}</div><div class="msub">${tcLabel}</div></div>
-    <div class="metric"><div class="mlb">Ventas cerradas BC${label}</div><div class="mvl">${fmt(gd.reduce((s,r)=>s+(r.comprado||0),0))}</div><div class="msub">${gd.length} cierres en región</div></div>
-    <div class="metric"><div class="mlb">Ventas fuera región${label}</div><div class="mvl">${fmt(fueraVend.reduce((s,r)=>s+(r.comprado||0),0))}</div><div class="msub">${fueraVend.length} cierres fuera</div></div>
-    <div class="metric" style="border-top:3px solid #b02020"><div class="mlb">🔴 Acción inmediata</div><div class="mvl" style="color:#b02020">${base.filter(r=>r.estatus==='En seguimiento'&&semaforoColor(r)==='red').length}</div><div class="msub">+6 días sin contacto</div></div>`;
+function updateDailyBrief(base){
+  const rojos=base.filter(r=>r.estatus==='En seguimiento'&&semaforoColor(r)==='red');
+  const amarillos=base.filter(r=>r.estatus==='En seguimiento'&&semaforoColor(r)==='yellow');
+  const verdes=base.filter(r=>r.estatus==='En seguimiento'&&semaforoColor(r)==='green');
+  const sinReg=base.filter(r=>r.estatus==='En seguimiento'&&semaforoColor(r)==='gray');
+  const hoy=new Date().toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'});
+  let h='<span class="brief-text" style="color:rgba(255,255,255,.4);font-size:10px;margin-right:8px;">'+hoy+'</span><div class="brief-divider"></div>';
+  if(rojos.length>0) h+='<div class="brief-stat"><div class="brief-dot red"></div><span class="brief-text"><strong>'+rojos.length+'</strong> urgentes +6d</span></div><div class="brief-divider"></div>';
+  if(amarillos.length>0) h+='<div class="brief-stat"><div class="brief-dot yellow"></div><span class="brief-text"><strong>'+amarillos.length+'</strong> en 3-5 días</span></div><div class="brief-divider"></div>';
+  h+='<div class="brief-stat"><div class="brief-dot green"></div><span class="brief-text"><strong>'+verdes.length+'</strong> al día</span></div>';
+  if(sinReg.length>0) h+='<div class="brief-divider"></div><span class="brief-text" style="color:rgba(255,255,255,.35)"><strong style="color:rgba(255,255,255,.55)">'+sinReg.length+'</strong> sin registrar</span>';
+  h+='<span class="brief-tc"><strong>TC:</strong> $'+tipoCambio.toFixed(2)+'</span>';
+  const el=document.getElementById('brief-inner');if(el)el.innerHTML=h;
 }
 
 function getPFiltered(){
@@ -776,23 +828,30 @@ function renderPipeline(){
   const eb=e=>{const m={'Ganada':'bg-g','En seguimiento':'bg-b','Perdida':'bg-r'};return`<span class="badge ${m[e]||'bg-gr'}">${e==='En seguimiento'?'Seguim.':e}</span>`;};
   const gb=r=>r.ganable?'<span class="badge bg-m">Sí</span>':`<span class="badge bg-gr" title="${r.razon||''}">No</span>`;
   const zs=z=>z==='Baja California'?'BC':z==='Los Cabos / BCS'?'Los Cabos':'Otro';
-  document.getElementById('tbody-p').innerHTML=rows.map(r=>`<tr>
-    <td style="border-left:4px solid ${rowBorderColor(r)};color:var(--tx3);font-size:11px;padding-left:8px">${r.no_cot}</td>
-    <td style="font-weight:500" title="${r.empresa}">${r.empresa}</td>
-    <td style="color:var(--tx2)" title="${r.material||''}">${(r.material||'').substring(0,18)}</td>
-    <td style="font-weight:500;text-align:right">${fmt(r.monto)}</td>
-    <td style="color:var(--tx2)">${(r.mes||'').substring(0,3)}</td>
-    <td style="color:var(--tx3);font-size:11px">${r.fecha||'—'}</td>
-    <td>${r.moneda==='USD'?'<span class="badge bg-a">USD</span>':'<span class="badge bg-b">MXN</span>'}</td>
-    <td>${semaforoBadge(r)}</td>
-    <td style="color:var(--tx2);font-size:11px">${zs(r.zona)}</td>
-    <td>${eb(r.estatus)}</td>
-    <td>${gb(r)}</td>
-    <td><button class="bsm bed" onclick="verDetalle(${r.id})">Ver</button> <button class="bsm bed" onclick="abrirEditar(${r.id})">✏</button></td>
-  </tr>`).join('');
+  document.getElementById('tbody-p').innerHTML=rows.map(r=>{
+    const rc=r.estatus==='En seguimiento'?(semaforoColor(r)==='red'?'row-red':semaforoColor(r)==='yellow'?'row-yellow':semaforoColor(r)==='green'?'row-green':''):'';
+    const sc=rowBorderColor(r);
+    const zz=r.zona==='Baja California'?'BC':r.zona==='Los Cabos / BCS'?'Cabos':'Otro';
+    const es={'Ganada':'bg-g','En seguimiento':'bg-b','Perdida':'bg-r'};
+    return '<tr class="'+rc+'" onclick="verDetalle('+r.id+')" style="cursor:pointer;">'
+      +'<td style="width:4px;padding:0;background:'+sc+';"></td>'
+      +'<td style="font-weight:600;font-size:12px" title="'+r.empresa+'">'+r.empresa+'</td>'
+      +'<td style="font-weight:700;color:var(--m);text-align:right">'+fmt(r.monto)+'</td>'
+      +'<td>'+semaforoBadge(r)+'</td>'
+      +'<td><span class="badge '+(es[r.estatus]||'bg-gr')+'">'+(r.estatus==='En seguimiento'?'Seguim.':r.estatus)+'</span></td>'
+      +'<td>'+(r.moneda==='USD'?'<span class="badge bg-a">USD</span>':'<span class="badge bg-b">MXN</span>')+'</td>'
+      +'<td style="color:var(--tx3);font-size:11px">'+(r.fecha||'—')+'</td>'
+      +'<td style="color:var(--tx2);font-size:11px">'+((r.mes||'').substring(0,3))+'</td>'
+      +'<td style="color:var(--tx3);font-size:11px">'+zz+'</td>'
+      +'<td style="color:var(--tx3);font-size:11px">'+r.no_cot+'</td>'
+      +'<td onclick="event.stopPropagation()">'
+        +(r.estatus==='En seguimiento'?'<button class="btn-grn btn-sm" onclick="registrarContactoHoy('+r.id+')" title="Contactar hoy">✓ Hoy</button>':'')
+        +'<button class="bsm bed" onclick="abrirEditar('+r.id+')" title="Editar" style="margin-left:2px">✏</button>'
+      +'</td>'
+    +'</tr>';}).join('');
 }
 
-function setFP(btn){fpFiltro=btn.dataset.f;document.querySelectorAll('#filters-pipeline .fbtn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderPipeline();}
+function setFP(btn){fpFiltro=btn.dataset.f;document.querySelectorAll('#filters-pipeline .filter-pill, [data-f]').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderPipeline();}
 function sortP(col){if(fpSort===col)fpDir=fpDir==='asc'?'desc':'asc';else{fpSort=col;fpDir='asc';}renderPipeline();}
 
 // ---- ANÁLISIS PAGE ----
@@ -802,20 +861,16 @@ function renderAnalisisMetrics(){
   const bcGan=bc.filter(r=>r.ganable&&r.estatus==='En seguimiento');
   const bcCerr=bc.filter(r=>r.ganable&&r.estatus==='Ganada');
   const fueraVend=fuera.filter(r=>r.estatus==='Ganada');
-  const fueraVendMonto=fueraVend.reduce((s,r)=>s+(r.comprado||0),0);
-
   const totMXN=pipeline.filter(r=>(r.moneda||'MXN')==='MXN').reduce((s,r)=>s+r.monto,0);
   const totUSD=pipeline.filter(r=>r.moneda==='USD').reduce((s,r)=>s+r.monto,0);
   const totGen=totMXN+(totUSD*tipoCambio);
-  const tcLabel=`TC FIX: $${tipoCambio.toFixed(2)} · ${tcFecha}`;
-
-  document.getElementById('metrics-analisis').innerHTML=`
-    <div class="metric accent"><div class="mlb">BC — pipeline ganable</div><div class="mvl hi">${fmt(bcGan.reduce((s,r)=>s+r.monto,0))}</div><div class="msub">${bcGan.length} abiertas</div></div>
-    <div class="metric"><div class="mlb">BC — ventas cerradas</div><div class="mvl">${fmt(bcCerr.reduce((s,r)=>s+(r.comprado||0),0))}</div><div class="msub">${bcCerr.length} cierres en región</div></div>
-    <div class="metric"><div class="mlb">Fuera — ventas cerradas</div><div class="mvl">${fmt(fueraVendMonto)}</div><div class="msub">${fueraVend.length} cierres fuera</div></div>
-    <div class="metric"><div class="mlb">Total MXN</div><div class="mvl" style="color:var(--m)">${fmt(totMXN)}</div><div class="msub">${pipeline.filter(r=>(r.moneda||'MXN')==='MXN').length} cotizaciones</div></div>
-    <div class="metric"><div class="mlb">Total USD</div><div class="mvl" style="color:var(--amb)">${'USD $'+totUSD.toLocaleString('es-MX',{minimumFractionDigits:0,maximumFractionDigits:0})}</div><div class="msub">${pipeline.filter(r=>r.moneda==='USD').length} cotizaciones</div></div>
-    <div class="metric accent" style="border-top-color:var(--lime)"><div class="mlb">Total general MXN</div><div class="mvl hi">${fmt(totGen)}</div><div class="msub" style="font-size:10px;">${tcLabel}</div></div>`;
+  document.getElementById('metrics-analisis').innerHTML=
+    '<div class="mcard accent"><div class="mlb">BC — pipeline ganable</div><div class="mvl hi">'+fmt(bcGan.reduce((s,r)=>s+r.monto,0))+'</div><div class="msub">'+bcGan.length+' abiertas</div></div>'+
+    '<div class="mcard"><div class="mlb">BC — ventas cerradas</div><div class="mvl">'+fmt(bcCerr.reduce((s,r)=>s+(r.comprado||0),0))+'</div><div class="msub">'+bcCerr.length+' cierres</div></div>'+
+    '<div class="mcard"><div class="mlb">Fuera — ventas cerradas</div><div class="mvl">'+fmt(fueraVend.reduce((s,r)=>s+(r.comprado||0),0))+'</div><div class="msub">'+fueraVend.length+' cierres fuera</div></div>'+
+    '<div class="mcard"><div class="mlb">Total MXN</div><div class="mvl" style="color:var(--m)">'+fmt(totMXN)+'</div><div class="msub">'+pipeline.filter(r=>(r.moneda||'MXN')==='MXN').length+' cotizaciones</div></div>'+
+    '<div class="mcard"><div class="mlb">Total USD</div><div class="mvl amb">$'+totUSD.toLocaleString('es-MX',{maximumFractionDigits:0})+'</div><div class="msub">'+pipeline.filter(r=>r.moneda==='USD').length+' cotizaciones</div></div>'+
+    '<div class="mcard accent" style="border-top-color:var(--lime)"><div class="mlb">Total general MXN</div><div class="mvl hi">'+fmt(totGen)+'</div><div class="msub" style="font-size:9px;">TC $'+tipoCambio.toFixed(2)+' · '+tcFecha+'</div></div>';
 }
 
 function getAFiltered(){
@@ -860,7 +915,7 @@ function setZona(btn){faZona=btn.dataset.z;document.querySelectorAll('.inner-tab
 function setLic(btn){
   faLic=btn.dataset.l;
   // find the filter buttons in the analisis page filters row
-  btn.closest('.filters').querySelectorAll('.fbtn').forEach(b=>b.classList.remove('on'));
+  btn.closest('.toolbar-left, .filters').querySelectorAll('.filter-pill,.fbtn').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
   renderAnalisis();
 }
@@ -869,28 +924,34 @@ function sortA(col){if(faSort===col)faDir=faDir==='asc'?'desc':'asc';else{faSort
 // ---- DETAIL PANEL ----
 function verDetalle(id){
   const r=pipeline.find(x=>x.id===id);if(!r)return;
-  document.getElementById('panel-content').innerHTML=`
-    <h3 style="font-size:15px;font-weight:700;margin-bottom:14px;padding-right:24px">${r.empresa}</h3>
-    <div class="df"><label>Cotización</label><p>${r.no_cot} · ${r.mes}</p></div>
-    <div class="df"><label>Fecha</label><p>${r.fecha||'—'}</p></div>
-    <div class="df"><label>Contacto</label><p>${r.nombre||'—'}</p></div>
-    <div class="df"><label>Material</label><p>${r.material||'—'}</p></div>
-    <div class="df"><label>Monto cotizado</label><p style="font-weight:700;font-size:16px;color:var(--m)">${fmt(r.monto)}</p></div>
-    <div class="df"><label>Monto comprado</label><p>${r.comprado?fmt(r.comprado):'—'}</p></div>
-    <div class="df"><label>Zona</label><p>${r.zona}</p></div>
-    <div class="df"><label>Estatus</label><p>${r.estatus}</p></div>
-    <div class="df"><label>¿Ganable?</label><p>${r.ganable?'Sí — cliente controla la compra':'No — '+(r.razon||'')}</p></div>
-    <div class="df"><label>Comentarios</label><p style="white-space:pre-wrap;font-size:12px;color:var(--tx2)">${r.comentario||'—'}</p></div>
-    <div class="df"><label>Último contacto</label><p>${r.ultimo_contacto||'Sin registro'}</p></div>
-    <div class="df"><label>Seguimiento</label><p>${r.estatus==='En seguimiento'?(diasSinContacto(r)!==null?diasSinContacto(r)+' días sin contacto':'Sin fecha de contacto'):'No aplica'}</p></div>
-    <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn-p" onclick="registrarContactoHoy(${r.id})" style="background:var(--grn)">✓ Contacté hoy</button>
-      <button class="btn-p" onclick="abrirEditar(${r.id});cPanel()">Editar</button>
-      <button class="bsm bdl" onclick="delPipeline(${r.id});cPanel()">Eliminar</button>
-    </div>`;
+  const diasUC=diasSinContacto(r);
+  const semC=semaforoColor(r);
+  const semLabel=semC==='red'?'🔴 Urgente — +6 días':semC==='yellow'?'🟡 Pendiente — 3-5 días':semC==='green'?'🟢 Al día — 0-2 días':'⚪ Sin registro';
+  const hdr=document.querySelector('#spanel .spanel-hdr h3');
+  if(hdr)hdr.textContent=r.empresa;
+  document.getElementById('panel-content').innerHTML=
+    '<div class="df"><label>Monto cotizado</label>'
+    +'<p style="font-size:22px;font-weight:800;color:var(--m);letter-spacing:-.5px;line-height:1.1">'+fmt(r.monto)+' <span style="font-size:11px;font-weight:500;color:var(--tx3)">'+(r.moneda||'MXN')+'</span></p>'
+    +(r.comprado?'<p style="font-size:11px;color:var(--grn);font-weight:600;margin-top:2px">✓ Comprado: '+fmt(r.comprado)+'</p>':'')
+    +'</div>'
+    +(r.estatus==='En seguimiento'?'<div class="df"><label>Seguimiento</label><p>'+semLabel+(r.ultimo_contacto?' · '+r.ultimo_contacto:'')+'</p></div>':'')
+    +'<div class="df"><label>Estatus</label><p>'+r.estatus+(!r.ganable?' — '+r.razon:'')+'</p></div>'
+    +'<div class="df"><label>Folio · Mes · Fecha</label><p class="muted">'+r.no_cot+' · '+r.mes+' · '+(r.fecha||'—')+'</p></div>'
+    +'<div class="df"><label>Contacto</label><p>'+(r.nombre||'—')+'</p></div>'
+    +'<div class="df"><label>Material</label><p class="muted">'+(r.material||'—')+'</p></div>'
+    +'<div class="df"><label>Zona</label><p class="muted">'+r.zona+'</p></div>'
+    +(r.comentario?'<div class="df"><label>Notas</label><p class="muted" style="white-space:pre-wrap;font-size:11px;line-height:1.5">'+r.comentario+'</p></div>':'');
+  const actEl=document.getElementById('panel-actions');
+  if(actEl)actEl.innerHTML=r.estatus==='En seguimiento'
+    ?'<button class="btn-p" style="background:var(--grn);width:100%;padding:9px;" onclick="registrarContactoHoy('+r.id+')">✓ Contacté hoy</button>'
+    +'<button class="btn-p" style="width:100%;padding:8px;" onclick="abrirEditar('+r.id+');cPanel()">Editar cotización</button>'
+    +'<button class="btn-o" style="width:100%;padding:8px;color:var(--red);" onclick="delPipeline('+r.id+');cPanel()">Eliminar</button>'
+    :'<button class="btn-p" style="width:100%;padding:8px;" onclick="abrirEditar('+r.id+');cPanel()">Editar cotización</button>'
+    +'<button class="btn-o" style="width:100%;padding:8px;color:var(--red);" onclick="delPipeline('+r.id+');cPanel()">Eliminar</button>';
   document.getElementById('pol').classList.add('on');
   document.getElementById('spanel').classList.add('on');
 }
+
 function cPanel(){document.getElementById('pol').classList.remove('on');document.getElementById('spanel').classList.remove('on');}
 
 // ---- MODAL PIPELINE ----
@@ -1181,5 +1242,7 @@ function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t
 
 init();
 </script>
+</body>
+</html>
 </body>
 </html>
