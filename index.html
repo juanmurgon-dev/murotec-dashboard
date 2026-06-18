@@ -809,7 +809,14 @@ async function fetchPipeline(){
       const mapped = data.map((r,i) => ({
         id: r.id || i+1,
         mes: (r.mes || '').toString().trim(),
-        fecha: (r.fecha || '').toString().trim(),
+        fecha: (()=>{
+          const raw=(r.fecha||'').toString().trim();
+          if(!raw) return '';
+          // Handle ISO: 2026-01-02T... → 02/01/2026
+          const iso=raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+          if(iso) return iso[3]+'/'+iso[2]+'/'+iso[1];
+          return raw; // already DD/MM/YYYY
+        })(),
         nombre: (r.nombre || '').toString().trim(),
         empresa: (r.empresa || '').toString().trim(),
         domicilio: (r.domicilio || '').toString().trim(),
@@ -823,7 +830,13 @@ async function fetchPipeline(){
         razon: (r.razon || '').toString().trim(),
         comentario: (r.comentario || '').toString().trim(),
         moneda: (r.moneda || 'MXN').toString().trim(),
-        ultimo_contacto: (r.ultimo_contacto || '').toString().trim()
+        ultimo_contacto: (()=>{
+          const raw=(r.ultimo_contacto||'').toString().trim();
+          if(!raw) return '';
+          const iso=raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+          if(iso) return iso[3]+'/'+iso[2]+'/'+iso[1];
+          return raw;
+        })()
       }));
       // Validar que los datos tengan contenido real (al menos empresa o no_cot)
       const validos = mapped.filter(r => r.empresa || r.no_cot);
