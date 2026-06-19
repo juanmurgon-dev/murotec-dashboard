@@ -1078,24 +1078,35 @@ async function gsAdd(r){
   try{
     showLoading(true);
     const payload={...r,bitacora:JSON.stringify(r.bitacora||[])};
-    await fetch(GS_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'add',...payload})});
+    await postToSheets({action:'add',...payload});
     showLoading(false);
-  }catch(e){showError('Error al guardar en Sheets');}
+  }catch(e){showError('Error al guardar en Sheets');console.error('gsAdd error:',e);}
 }
+// Write to Sheets via GET param (allorigins proxy, avoids CORS)
+// Apps Script doGet handles ?write=1&data=... for mutations
+async function postToSheets(payload){
+  const data = encodeURIComponent(JSON.stringify(payload));
+  const url = GS_URL + '?write=1&data=' + data;
+  const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(url);
+  const res = await fetch(proxyUrl);
+  const outer = await res.json();
+  return JSON.parse(outer.contents||'{}');
+}
+
 async function gsUpdate(r){
   try{
     showLoading(true);
     const payload={...r,bitacora:JSON.stringify(r.bitacora||[])};
-    await fetch(GS_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'update',...payload})});
+    await postToSheets({action:'update',...payload});
     showLoading(false);
-  }catch(e){showError('Error al actualizar en Sheets');}
+  }catch(e){showError('Error al actualizar en Sheets');console.error('gsUpdate error:',e);}
 }
 async function gsDelete(id){
   try{
     showLoading(true);
-    await fetch(GS_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'delete',id})});
+    await postToSheets({action:'delete',id});
     showLoading(false);
-  }catch(e){showError('Error al eliminar en Sheets');}
+  }catch(e){showError('Error al eliminar en Sheets');console.error('gsDelete error:',e);}
 }
 
 // ---- PAGES ----
