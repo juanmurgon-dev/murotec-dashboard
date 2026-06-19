@@ -1688,6 +1688,10 @@ function guardarCot(){
   gsAdd(newEntry);
   const monedaSel=V('c-moneda')||'MXN';const fechaCotSel=(()=>{const f=V('c-fechacot');return f?new Date(f+'T00:00:00').toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'}):new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'});})();
   const q={id:Date.now(),no_cot:V('c-folio')||noCot,moneda:monedaSel,fecha:fechaCotSel,empresa,contacto:V('c-contacto'),tel:V('c-tel'),ciudad:V('c-ciudad'),proyecto:V('c-proyecto'),email:V('c-email'),items,subtotal:sub,ivaAmt:sub*iva,total,iva,vigencia:V('c-vigencia'),pago:V('c-pago'),entrega:V('c-entrega'),notas:V('c-notas'),ganable,zona:V('c-zona'),fecha:new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'2-digit'})};
+  if(window._editingQuoteId){
+    quotes = quotes.filter(x=>x.id!==window._editingQuoteId);
+    window._editingQuoteId = null;
+  }
   quotes.push(q);saveQ();
   toast('Cotización guardada y agregada al pipeline');imprimirCot(q);
 }
@@ -1722,9 +1726,63 @@ function imprimirCot(q){
 function renderSQ(){
   const el=document.getElementById('sq-wrap');
   if(!quotes.length){el.innerHTML='<div class="empty"><p>📋</p><p style="font-size:15px;font-weight:600;margin-bottom:4px">Sin cotizaciones guardadas</p><p>Genera tu primera cotización</p></div>';return;}
-  el.innerHTML=quotes.slice().reverse().map(q=>`<div class="sq-item"><div><p style="font-size:13px;font-weight:500">${q.no_cot} — ${q.empresa}</p><p style="font-size:11px;color:var(--tx2)">${q.fecha} · ${fmtF(q.total)} · ${q.items.length} producto${q.items.length!==1?'s':''}</p></div><div style="display:flex;gap:6px;flex-shrink:0"><button class="bsm bed" onclick='imprimirCot(${JSON.stringify(q).replace(/'/g,"&#39;")})'>↓ PDF</button><button class="bsm bdl" onclick="delQ(${q.id})">×</button></div></div>`).join('');
+  el.innerHTML=quotes.slice().reverse().map(q=>`<div class="sq-item"><div><p style="font-size:13px;font-weight:500">${q.no_cot} — ${q.empresa}</p><p style="font-size:11px;color:var(--tx2)">${q.fecha} · ${fmtF(q.total)} · ${q.items.length} producto${q.items.length!==1?'s':''}</p></div><div style="display:flex;gap:6px;flex-shrink:0"><button class="bsm bed" onclick="editarCotizacion(${q.id})">✏ Editar</button><button class="bsm bed" onclick='imprimirCot(${JSON.stringify(q).replace(/'/g,"&#39;")})'>↓ PDF</button><button class="bsm bdl" onclick="delQ(${q.id})">×</button></div></div>`).join('');
 }
 function delQ(id){if(!confirm('¿Eliminar?'))return;quotes=quotes.filter(q=>q.id!==id);saveQ();renderSQ();toast('Eliminada');}
+
+function editarCotizacion(id){
+  const q = quotes.find(x=>x.id===id);
+  if(!q) return;
+
+  // Switch to cotizador tab
+  const cotBtn = document.querySelectorAll('.ntab')[2];
+  gotoPage('cotizador', cotBtn);
+
+  // Pre-fill all fields
+  setTimeout(()=>{
+    const set = (elId, val) => { const el=document.getElementById(elId); if(el) el.value=val||''; };
+    set('c-folio', q.no_cot);
+    set('c-empresa', q.empresa);
+    set('c-contacto', q.contacto);
+    set('c-tel', q.tel);
+    set('c-ciudad', q.ciudad);
+    set('c-proyecto', q.proyecto);
+    set('c-email', q.email);
+    set('c-notas', q.notas);
+    set('c-vigencia', q.vigencia);
+    set('c-pago', q.pago);
+    set('c-entrega', q.entrega);
+    const ivaEl = document.getElementById('c-iva');
+    if(ivaEl) ivaEl.value = q.iva || 0.16;
+    const monedaEl = document.getElementById('c-moneda');
+    if(monedaEl) monedaEl.value = q.moneda || 'MXN';
+    // Set fecha
+    if(q.fecha){
+      const p=q.fecha.split('/');
+      if(p.length===3){ const fc=document.getElementById('c-fechacot'); if(fc) fc.value=p[2]+'-'+p[1]+'-'+p[0]; }
+    }
+    // Restore items
+    document.getElementById('items-container').innerHTML='';
+    cotItems=[];
+    (q.items||[]).forEach(item=>{
+      const idx=cotItems.length;
+      cotItems.push({desc:item.desc||'',cant:item.cant||1,precio:item.precio||0,unidad:item.unidad||'m2'});
+      const div=document.createElement('div');
+      div.className='item-row';div.id='ir-'+idx;
+      div.innerHTML='<input type="text" placeholder="Descripción" oninput="cotItems['+idx+'].desc=this.value;updPrev()" value="'+((item.desc||'').replace(/"/g,'&quot;'))+'" style="grid-column:span 2;">'
+        +'<select oninput="cotItems['+idx+'].unidad=this.value;updPrev()" onchange="cotItems['+idx+'].unidad=this.value;updPrev()"><option value="m2"'+(item.unidad==='m2'?' selected':'')+'>m2</option><option value="ml"'+(item.unidad==='ml'?' selected':'')+'>ml</option><option value="kg"'+(item.unidad==='kg'?' selected':'')+'>kg</option><option value="rollo"'+(item.unidad==='rollo'?' selected':'')+'>rollo</option><option value="pieza"'+(item.unidad==='pieza'?' selected':'')+'>pieza</option><option value="ton"'+(item.unidad==='ton'?' selected':'')+'>ton</option><option value="global"'+(item.unidad==='global'?' selected':'')+'>global</option><option value="servicio"'+(item.unidad==='servicio'?' selected':'')+'>servicio</option></select>'
+        +'<input type="number" value="'+(item.cant||1)+'" min="1" step="any" oninput="cotItems['+idx+'].cant=+this.value;updPrev()">'
+        +'<input type="number" value="'+(item.precio||0)+'" min="0" step="0.01" oninput="cotItems['+idx+'].precio=+this.value;updPrev()">'
+        +'<input type="text" id="it-'+idx+'" value="$0.00" readonly style="background:var(--sur2);font-weight:500;">'
+        +'<button class="btn-rm" onclick="rmItem('+idx+')">×</button>';
+      document.getElementById('items-container').appendChild(div);
+    });
+    // Mark as editing existing quote
+    window._editingQuoteId = id;
+    updPrev();
+    toast('Cotización cargada — modifica y guarda de nuevo');
+  }, 150);
+}
 
 
 // ── CLIENTES ──────────────────────────────
