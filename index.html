@@ -1240,11 +1240,16 @@ function verDetalle(id){
     +'<div id="bitacora-list-'+r.id+'">'+renderBitacora(r.bitacora||[])+'</div>'
     +'</div>';
   const actEl=document.getElementById('panel-actions');
-  if(actEl)actEl.innerHTML=r.estatus==='En seguimiento'
-    ?'<button class="btn-p" style="background:var(--grn);width:100%;padding:9px;" onclick="registrarContactoHoy('+r.id+')">✓ Contacté hoy</button>'
+  const qGuardada = quotes.find(q=>q.no_cot===r.no_cot);
+  const btnVer = qGuardada
+    ? '<button class="btn-l" style="width:100%;padding:8px;margin-bottom:4px;font-size:12px;" onclick="imprimirCot(quotes.find(q=>q.no_cot===\''+r.no_cot+'\'))">📄 Ver cotización PDF</button>'
+    : '';
+  if(actEl)actEl.innerHTML=
+    btnVer
+    +(r.estatus==='En seguimiento'
+      ?'<button class="btn-p" style="background:var(--grn);width:100%;padding:9px;" onclick="registrarContactoHoy('+r.id+')">✓ Contacté hoy</button>'
+      :'')
     +'<button class="btn-p" style="width:100%;padding:8px;" onclick="abrirEditar('+r.id+');cPanel()">Editar cotización</button>'
-    +'<button class="btn-o" style="width:100%;padding:8px;color:var(--red);" onclick="delPipeline('+r.id+');cPanel()">Eliminar</button>'
-    :'<button class="btn-p" style="width:100%;padding:8px;" onclick="abrirEditar('+r.id+');cPanel()">Editar cotización</button>'
     +'<button class="btn-o" style="width:100%;padding:8px;color:var(--red);" onclick="delPipeline('+r.id+');cPanel()">Eliminar</button>';
   document.getElementById('pol').classList.add('on');
   document.getElementById('spanel').classList.add('on');
