@@ -363,6 +363,80 @@ tr:hover td{background:rgba(61,74,56,.04) !important;}
   border-left:3px solid var(--bd);
 }
 .sq-item:hover{border-left-color:var(--m);}
+
+/* ── CLIENTES ─────────────────────────────── */
+.cli-item{
+  padding:10px 14px;border-bottom:1px solid var(--bd);
+  cursor:pointer;display:flex;align-items:center;gap:10px;
+  transition:background .1s;
+}
+.cli-item:hover{background:var(--sur2);}
+.cli-item.active{background:var(--ml);border-left:3px solid var(--m);}
+.cli-rank{
+  width:22px;height:22px;border-radius:50%;
+  background:var(--sur3);color:var(--tx3);
+  font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.cli-rank.top{background:var(--m);color:#fff;}
+.cli-info{flex:1;min-width:0;}
+.cli-name{font-size:12px;font-weight:600;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.cli-meta{font-size:10px;color:var(--tx3);margin-top:1px;}
+.cli-count{
+  background:var(--ml);color:var(--m);
+  font-size:11px;font-weight:800;
+  padding:2px 8px;border-radius:99px;flex-shrink:0;
+}
+.cli-count.high{background:var(--m);color:#fff;}
+.cli-det-hdr{
+  background:var(--m);color:#fff;
+  padding:16px 20px;
+}
+.cli-det-hdr h2{font-size:15px;font-weight:800;margin-bottom:4px;}
+.cli-det-stats{display:flex;gap:20px;margin-top:12px;}
+.cli-stat{text-align:center;}
+.cli-stat-val{font-size:18px;font-weight:800;color:#fff;}
+.cli-stat-lbl{font-size:9px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.08em;}
+.cli-det-body{padding:16px 20px;}
+.cli-cot-item{
+  background:var(--sur);border:1px solid var(--bd);
+  border-radius:var(--r);padding:10px 14px;margin-bottom:8px;
+  display:flex;align-items:center;gap:12px;
+  border-left:3px solid var(--bd);cursor:pointer;
+}
+.cli-cot-item:hover{border-left-color:var(--m);}
+.cli-cot-item.ganada{border-left-color:var(--grn);}
+.cli-cot-item.seguimiento{border-left-color:var(--blu);}
+.cli-cot-item.perdida{border-left-color:var(--red);}
+
+/* ── INTELIGENCIA ─────────────────────────── */
+.intel-block{
+  background:var(--sur2);border:1px solid var(--bd);
+  border-radius:var(--r);padding:10px 12px;margin-bottom:10px;
+}
+.intel-temp{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:4px 10px;border-radius:99px;font-size:11px;font-weight:700;
+  margin-bottom:10px;
+}
+.intel-temp.hot{background:#fff3e0;color:#b84c00;}
+.intel-temp.new{background:var(--bbg);color:var(--blu);}
+.intel-temp.recurrent{background:var(--gbg);color:var(--grn);}
+.intel-temp.cold{background:var(--sur3);color:var(--tx3);}
+.intel-stat-row{display:flex;gap:8px;margin-bottom:8px;}
+.intel-stat{
+  flex:1;background:var(--sur);border:1px solid var(--bd);
+  border-radius:var(--r);padding:7px 10px;text-align:center;
+}
+.intel-stat-val{font-size:15px;font-weight:800;color:var(--m);}
+.intel-stat-lbl{font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;margin-top:1px;}
+.intel-hist-item{
+  display:flex;align-items:center;gap:8px;
+  padding:5px 0;border-bottom:1px solid var(--bd);font-size:11px;
+}
+.intel-hist-item:last-child{border-bottom:none;}
+.intel-hist-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.intel-sect-label{font-size:9px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.09em;margin-bottom:6px;margin-top:12px;}
 .empty{text-align:center;padding:56px 20px;color:var(--tx3);}
 .empty p:first-child{font-size:32px;margin-bottom:10px;}
 .ph{
@@ -453,6 +527,7 @@ tr:hover td{background:rgba(61,74,56,.04) !important;}
   <div class="nav-tabs">
     <button class="ntab on"  onclick="gotoPage('pipeline',this)">Pipeline</button>
     <button class="ntab"     onclick="gotoPage('analisis',this)">Análisis</button>
+    <button class="ntab"     onclick="gotoPage('clientes',this)">Clientes</button>
     <button class="ntab"     onclick="gotoPage('cotizador',this)">Nueva cotización</button>
     <button class="ntab"     onclick="gotoPage('guardadas',this)">Historial</button>
   </div>
@@ -571,6 +646,38 @@ tr:hover td{background:rgba(61,74,56,.04) !important;}
       </tr></thead>
       <tbody id="tbody-a"></tbody>
     </table>
+  </div>
+</div>
+
+<!-- ====== PAGE: CLIENTES ====== -->
+<div class="page" id="page-clientes">
+  <div class="ph">
+    <div class="ph-title"><h1>Frecuencia por cliente</h1><p>Clientes ordenados por número de cotizaciones</p></div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <div class="srch"><span class="srch-ic">⌕</span><input id="srch-cli" type="text" placeholder="Buscar empresa..." oninput="renderClientes()"></div>
+      <span class="cnt" id="cnt-cli"></span>
+    </div>
+  </div>
+
+  <!-- Métricas rápidas -->
+  <div class="metrics-strip" id="metrics-clientes"></div>
+
+  <div style="display:grid;grid-template-columns:320px 1fr;flex:1;overflow:hidden;">
+
+    <!-- Lista de clientes -->
+    <div style="border-right:1px solid var(--bd);overflow-y:auto;background:var(--sur);">
+      <div id="clientes-lista"></div>
+    </div>
+
+    <!-- Detalle del cliente seleccionado -->
+    <div style="overflow-y:auto;background:var(--bg);" id="cliente-detalle-wrap">
+      <div class="empty" style="padding-top:80px;">
+        <p>👆</p>
+        <p style="font-size:14px;font-weight:600;color:var(--tx2)">Selecciona un cliente</p>
+        <p style="font-size:12px;">para ver su historial completo</p>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -701,7 +808,7 @@ tr:hover td{background:rgba(61,74,56,.04) !important;}
 <div id="print-area"></div>
 <script>
 const SK_Q='murotec_quotes_v1';
-const GS_URL='https://script.google.com/macros/s/AKfycby0aZxRtcOP3yZKnAeguSrN8mR03tyalD9SK1FzOEgRp6kHVqegHfc3BEfiF0yZtWpQQw/exec';
+const GS_URL='https://script.google.com/macros/s/AKfycbxiNOu6NuB2b03lA-saBTlnqhHmZmdKOd0FZN1e6jkqr8hUWrISsuPmsuYSnXwOf2xNGw/exec';
 let gsLoaded=false;
 const MESES=['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
 const EMP={nombre:'MUROTEC®',web:'murotecmx.com',tel:'+52 664 674 0628',email:'juanmurgon@murotecmx.com',contacto:'Juan Murillo González',cargo:'Director Comercial'};
@@ -809,7 +916,10 @@ async function fetchTCOpen(){
 
 function init(){
   const q=localStorage.getItem(SK_Q); quotes=q?JSON.parse(q):[];
+  // Pre-load RAW so UI is never empty while Sheets loads
+  pipeline = JSON.parse(JSON.stringify(RAW));
   addItem(); updPrev();
+  renderPipeline(); renderAnalisisMetrics(); renderAnalisis();
   showLoading(true);
   fetchTipoCambio().then(()=>fetchPipeline());
 }
@@ -838,85 +948,72 @@ async function fetchPipeline(){
     if(Array.isArray(data) && data.length > 0){
       const mapped = data.map((r,i) => ({
         id: r.id || i+1,
-        mes: (r.mes || '').toString().trim(),
-        fecha: (()=>{
-          const raw=(r.fecha||'').toString().trim();
-          if(!raw) return '';
-          // Handle ISO: 2026-01-02T... → 02/01/2026
-          const iso=raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
-          if(iso) return iso[3]+'/'+iso[2]+'/'+iso[1];
-          return raw; // already DD/MM/YYYY
-        })(),
-        nombre: (r.nombre || '').toString().trim(),
-        empresa: (r.empresa || '').toString().trim(),
-        domicilio: (r.domicilio || '').toString().trim(),
-        zona: (r.zona || 'Otro estado').toString().trim(),
-        no_cot: (r.no_cot || '').toString().trim(),
-        material: (r.material || '').toString().trim(),
-        monto: parseFloat(r.monto) || 0,
-        comprado: parseFloat(r.comprado) || 0,
-        estatus: (r.estatus || 'En seguimiento').toString().trim(),
-        ganable: r.ganable === 'Sí' || r.ganable === true || r.ganable === 'true',
-        razon: (r.razon || '').toString().trim(),
-        comentario: (r.comentario || '').toString().trim(),
-        moneda: (r.moneda || 'MXN').toString().trim(),
-        ultimo_contacto: (()=>{
-          const raw=(r.ultimo_contacto||'').toString().trim();
-          if(!raw) return '';
-          const iso=raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
-          if(iso) return iso[3]+'/'+iso[2]+'/'+iso[1];
-          return raw;
-        })(),
-        bitacora: (()=>{
+        mes: (r.mes||'').toString().trim(),
+        fecha: formatFecha(r.fecha),
+        nombre: (r.nombre||'').toString().trim(),
+        empresa: (r.empresa||'').toString().trim(),
+        domicilio: (r.domicilio||'').toString().trim(),
+        zona: (r.zona||'Otro estado').toString().trim(),
+        no_cot: (r.no_cot||'').toString().trim(),
+        material: (r.material||'').toString().trim(),
+        monto: parseFloat(r.monto)||0,
+        comprado: parseFloat(r.comprado)||0,
+        estatus: (r.estatus||'En seguimiento').toString().trim(),
+        ganable: r.ganable==='Sí'||r.ganable===true||r.ganable==='true',
+        razon: (r.razon||'').toString().trim(),
+        comentario: (r.comentario||'').toString().trim(),
+        moneda: (r.moneda||'MXN').toString().trim(),
+        ultimo_contacto: formatFecha(r.ultimo_contacto),
+        bitacora:(()=>{
           const raw=(r.bitacora||'').toString().trim();
-          if(!raw) return [];
+          if(!raw||raw==='[]') return [];
           try{ return JSON.parse(raw); }catch(e){ return []; }
         })()
       }));
-      // Validar que los datos tengan contenido real (al menos empresa o no_cot)
       const validos = mapped.filter(r => r.empresa || r.no_cot);
       if(validos.length > 0){
         pipeline = validos;
         gsLoaded = true;
-        console.log('Sheets OK:', pipeline.length, 'filas | USD:', pipeline.filter(r=>r.moneda==='USD').length);
+        console.log('Sheets OK:', pipeline.length);
       } else {
-        // Sheet tiene filas pero vacías — usar RAW
         console.warn('Sheets: filas vacías, usando RAW');
         pipeline = JSON.parse(JSON.stringify(RAW));
-        uploadAllToSheet();
+        if(!gsLoaded) uploadAllToSheet();
       }
     } else {
-      // Sheet vacío — subir datos iniciales
-      console.log('Sheet vacío, cargando RAW y subiendo...');
       pipeline = JSON.parse(JSON.stringify(RAW));
       if(!gsLoaded) uploadAllToSheet();
     }
   } catch(e) {
-    console.warn('Error cargando Sheets, usando RAW:', e);
     showError('Sin conexión a Google Sheets — mostrando datos locales');
     pipeline = JSON.parse(JSON.stringify(RAW));
+    console.warn('fetchPipeline error:', e);
   }
   cotNum = Math.max(...pipeline.map(x=>x.id||0), 0) + 1;
   showLoading(false);
   renderPipeline(); renderAnalisisMetrics(); renderAnalisis();
+  // If clientes tab is active, refresh it too
+  if(document.getElementById('page-clientes').classList.contains('on')) renderClientes();
 }
 
+function formatFecha(raw){
+  if(!raw) return '';
+  const s = raw.toString().trim();
+  if(!s) return '';
+  const iso = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(iso) return iso[3]+'/'+iso[2]+'/'+iso[1];
+  return s;
+}
+
+
 async function uploadAllToSheet(){
-  // First time: upload all RAW data to sheet
   showLoading(true);
   for(const r of pipeline){
-    try{
-      await fetch(GS_URL,{method:'POST',body:JSON.stringify({action:'add',...r})});
-    }catch(e){}
+    try{ await fetch(GS_URL,{method:'POST',body:JSON.stringify({action:'add',...r})}); }catch(e){}
   }
   gsLoaded=true;
   showLoading(false);
 }
-
-async function save(){
-  // No-op — saves happen on individual actions via gsAdd/gsUpdate/gsDelete
-}
-function saveQ(){localStorage.setItem(SK_Q,JSON.stringify(quotes));}
 
 async function gsAdd(r){
   try{
@@ -950,6 +1047,17 @@ function gotoPage(id,btn){
   btn.classList.add('on');
   if(id==='guardadas') renderSQ();
   if(id==='analisis'){renderAnalisisMetrics();renderAnalisis();}
+  if(id==='clientes'){
+    if(pipeline.length > 0){ renderClientes(); }
+    else {
+      // Pipeline not loaded yet — wait and retry
+      document.getElementById('clientes-lista').innerHTML = '<div class="empty" style="padding:40px 20px;"><p style="font-size:20px;">⏳</p><p>Cargando pipeline...</p></div>';
+      const check = setInterval(()=>{
+        if(pipeline.length > 0){ clearInterval(check); renderClientes(); }
+      }, 300);
+      setTimeout(()=>clearInterval(check), 10000);
+    }
+  }
   if(id==='cotizador'){
     const folioEl=document.getElementById('c-folio');
     if(folioEl&&!folioEl.value) folioEl.value=nextFolio();
@@ -1230,6 +1338,7 @@ function verDetalle(id){
     +'<div class="df"><label>Material</label><p class="muted">'+(r.material||'—')+'</p></div>'
     +'<div class="df"><label>Zona</label><p class="muted">'+r.zona+'</p></div>'
     +(r.comentario?'<div class="df"><label>Nota original</label><p class="muted" style="white-space:pre-wrap;font-size:11px;line-height:1.5">'+r.comentario+'</p></div>':'')
+    +buildIntelHTML(r)
     +'<div class="bitacora-wrap">'
     +'<div class="bitacora-title">Bitácora de seguimiento</div>'
     +'<div class="bitacora-input-row">'
@@ -1528,8 +1637,8 @@ function imprimirCot(q){
     }
   </style>
 </head>
-<body style="-webkit-print-color-adjust:exact;print-color-adjust:exact;">${html}</body>
-</html>`);
+<body style="-webkit-print-color-adjust:exact;print-color-adjust:exact;">${html}
+`);
   win.document.close();
   setTimeout(()=>{ win.focus(); win.print(); }, 700);
 }
@@ -1571,12 +1680,125 @@ function agregarNota(id){
   toast('Nota agregada');
 }
 
+// ── CLIENTES ──────────────────────────────
+let clienteActivo = null;
+
+function getClientesData(){
+  const q = (document.getElementById('srch-cli')||{}).value||'';
+  const map = {};
+  pipeline.forEach(r => {
+    const key = (r.empresa||'').trim();
+    if(!key) return;
+    if(q && !key.toLowerCase().includes(q.toLowerCase())) return;
+    if(!map[key]) map[key] = {empresa:key,cots:[],totalCotizado:0,totalComprado:0,ganadas:0,perdidas:0,seguimiento:0};
+    map[key].cots.push(r);
+    map[key].totalCotizado += r.monto||0;
+    map[key].totalComprado += r.comprado||0;
+    if(r.estatus==='Ganada') map[key].ganadas++;
+    else if(r.estatus==='Perdida') map[key].perdidas++;
+    else map[key].seguimiento++;
+  });
+  return Object.values(map).sort((a,b) => b.cots.length - a.cots.length);
+}
+
+function renderClientes(){
+  const data = getClientesData();
+  document.getElementById('cnt-cli').textContent = data.length + ' clientes';
+  const total = pipeline.length;
+  const conMas = data.filter(c => c.cots.length > 1).length;
+  const top = data[0];
+
+  const mEl = document.getElementById('metrics-clientes');
+  if(mEl){
+    let mHtml = '<div class="mcard accent"><div class="mlb">Clientes únicos</div><div class="mvl hi">' + data.length + '</div><div class="msub">en el pipeline</div></div>';
+    mHtml += '<div class="mcard"><div class="mlb">Recurrentes</div><div class="mvl">' + conMas + '</div><div class="msub">más de 1 cotización</div></div>';
+    if(top) mHtml += '<div class="mcard"><div class="mlb">Más frecuente</div><div class="mvl" style="font-size:13px;font-weight:700;">' + top.empresa.substring(0,20) + '</div><div class="msub">' + top.cots.length + ' cotizaciones</div></div>';
+    mHtml += '<div class="mcard"><div class="mlb">Promedio</div><div class="mvl">' + (data.length>0?(total/data.length).toFixed(1):0) + '</div><div class="msub">cotizaciones por cliente</div></div>';
+    mEl.innerHTML = mHtml;
+  }
+
+  const lista = document.getElementById('clientes-lista');
+  if(!lista) return;
+  if(!data.length){ lista.innerHTML = '<div class="empty"><p>🔍</p><p>Sin resultados</p></div>'; return; }
+
+  let lHtml = '';
+  data.forEach(function(c, i){
+    const tasa = c.cots.length > 0 ? Math.round(c.ganadas / c.cots.length * 100) : 0;
+    const ac = clienteActivo === c.empresa ? ' active' : '';
+    const tc = i < 3 ? ' top' : '';
+    const hc = c.cots.length >= 3 ? ' high' : '';
+    lHtml += '<div class="cli-item' + ac + '" onclick="selCli(' + i + ')">'
+      + '<div class="cli-rank' + tc + '">' + (i+1) + '</div>'
+      + '<div class="cli-info">'
+        + '<div class="cli-name">' + c.empresa + '</div>'
+        + '<div class="cli-meta">' + fmt(c.totalCotizado) + ' cotizado &middot; ' + tasa + '% cierre</div>'
+      + '</div>'
+      + '<span class="cli-count' + hc + '">' + c.cots.length + '</span>'
+    + '</div>';
+  });
+  lista.innerHTML = lHtml;
+
+  if(clienteActivo) selCli(data.findIndex(function(x){ return x.empresa===clienteActivo; }));
+}
+
+function selCli(i){
+  const data = getClientesData();
+  const c = data[i];
+  if(!c) return;
+  clienteActivo = c.empresa;
+
+  document.querySelectorAll('.cli-item').forEach(function(el){ el.classList.remove('active'); });
+  const items = document.querySelectorAll('.cli-item');
+  if(items[i]) items[i].classList.add('active');
+
+  const tasa = c.cots.length > 0 ? Math.round(c.ganadas / c.cots.length * 100) : 0;
+  const cots = c.cots.slice().sort(function(a,b){
+    return (typeof parseFecha==='function' ? parseFecha(b.fecha)-parseFecha(a.fecha) : 0);
+  });
+
+  let dHtml = '<div class="cli-det-hdr">'
+    + '<h2>' + c.empresa + '</h2>'
+    + '<div class="cli-det-stats">'
+      + '<div class="cli-stat"><div class="cli-stat-val">' + c.cots.length + '</div><div class="cli-stat-lbl">Cotizaciones</div></div>'
+      + '<div class="cli-stat"><div class="cli-stat-val">' + fmt(c.totalCotizado) + '</div><div class="cli-stat-lbl">Cotizado</div></div>'
+      + '<div class="cli-stat"><div class="cli-stat-val">' + fmt(c.totalComprado) + '</div><div class="cli-stat-lbl">Comprado</div></div>'
+      + '<div class="cli-stat"><div class="cli-stat-val">' + tasa + '%</div><div class="cli-stat-lbl">Cierre</div></div>'
+      + '<div class="cli-stat"><div class="cli-stat-val">' + c.ganadas + '</div><div class="cli-stat-lbl">Ganadas</div></div>'
+      + '<div class="cli-stat"><div class="cli-stat-val">' + c.seguimiento + '</div><div class="cli-stat-lbl">Seguim.</div></div>'
+    + '</div>'
+  + '</div>'
+  + '<div class="cli-det-body">'
+    + '<p style="font-size:9px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;">Historial de cotizaciones</p>';
+
+  cots.forEach(function(r){
+    const cls = r.estatus==='Ganada'?'ganada':r.estatus==='Perdida'?'perdida':'seguimiento';
+    const esBadge = r.estatus==='Ganada'?'bg-g':r.estatus==='Perdida'?'bg-r':'bg-b';
+    const sb = (typeof semaforoBadge==='function' && r.estatus==='En seguimiento') ? semaforoBadge(r) : '';
+    dHtml += '<div class="cli-cot-item ' + cls + '" onclick="verDetalle(' + r.id + ')">'
+      + '<div style="flex:1;min-width:0;">'
+        + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">'
+          + '<span style="font-size:11px;font-weight:700;color:var(--tx);">' + r.no_cot + '</span>'
+          + '<span style="font-size:10px;color:var(--tx3);">' + (r.fecha||'') + '</span>'
+          + sb
+        + '</div>'
+        + '<div style="font-size:11px;color:var(--tx2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (r.material||'') + '</div>'
+      + '</div>'
+      + '<div style="text-align:right;flex-shrink:0;">'
+        + '<div style="font-size:13px;font-weight:800;color:var(--m);">' + fmt(r.monto) + '</div>'
+        + '<span class="badge ' + esBadge + '">' + r.estatus + '</span>'
+      + '</div>'
+    + '</div>';
+  });
+
+  dHtml += '</div>';
+  const wrap = document.getElementById('cliente-detalle-wrap');
+  if(wrap) wrap.innerHTML = dHtml;
+}
+
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
 
 
 init();
 </script>
-</body>
-</html>
 </body>
 </html>
