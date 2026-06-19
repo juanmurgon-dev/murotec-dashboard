@@ -508,12 +508,96 @@ tr:hover td{background:rgba(61,74,56,.04) !important;}
 }
 
 @media(max-width:700px){
+  /* Cotizador */
   .cot-layout{grid-template-columns:1fr;}
   .fgrid{grid-template-columns:1fr;}
   .fg.full{grid-column:1;}
+
+  /* Panel lateral full width */
   .spanel{width:100%;}
-  .metrics-strip{overflow-x:auto;}
+
+  /* Soil bar — hide on small screens */
   .soil-bar{display:none;}
+
+  /* Nav — compact */
+  .nav{padding:0 12px;height:44px;}
+  .nav-slogan{display:none;}
+  .nav-brand span{font-size:12px;letter-spacing:2px;}
+  .nav-tabs{gap:0;}
+  .ntab{padding:4px 9px;font-size:10.5px;}
+
+  /* Metrics — 2 column grid instead of horizontal scroll */
+  .metrics-strip{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    overflow-x:visible;
+    border-bottom:1px solid var(--bd);
+  }
+  .mcard{
+    border-right:none;
+    border-bottom:1px solid var(--bd);
+    min-width:0;
+    padding:10px 12px;
+  }
+  .mcard:last-child{border-bottom:none;}
+  .mvl{font-size:15px;}
+
+  /* Toolbar — compact filters */
+  .toolbar{padding:7px 12px;flex-wrap:wrap;gap:6px;}
+  .toolbar-left{gap:4px;}
+  .divider-v{display:none;}
+  .filter-pill{padding:3px 8px;font-size:10.5px;}
+  .srch input{width:140px;font-size:11px;}
+
+  /* Hide secondary filter selects — keep only seguimiento filter */
+  #cf-zona,#cf-moneda,#cf-mes{display:none;}
+
+  /* Table — show only key columns */
+  .tbl-scroll td:nth-child(6),  /* moneda */
+  .tbl-scroll td:nth-child(7),  /* fecha */
+  .tbl-scroll td:nth-child(8),  /* mes */
+  .tbl-scroll td:nth-child(9),  /* zona */
+  .tbl-scroll td:nth-child(10), /* folio */
+  .tbl-scroll th:nth-child(6),
+  .tbl-scroll th:nth-child(7),
+  .tbl-scroll th:nth-child(8),
+  .tbl-scroll th:nth-child(9),
+  .tbl-scroll th:nth-child(10){
+    display:none;
+  }
+
+  /* Table rows taller for touch */
+  td{height:46px;font-size:12px;}
+
+  /* Edit button in actions — hide on mobile to save space */
+  .tbl-scroll .bed{display:none;}
+
+  /* Page header */
+  .ph{padding:9px 12px;}
+  .ph-title h1{font-size:13px;}
+
+  /* Side panel full screen */
+  .spanel{top:44px;}
+
+  /* Inner tabs wrap */
+  .inner-tabs{flex-wrap:wrap;gap:3px;padding:8px 12px;}
+  .itab{font-size:10.5px;padding:3px 9px;}
+
+  /* Clientes layout — stack vertically */
+  #page-clientes > div[style*="grid-template-columns"]{
+    display:flex;flex-direction:column;
+  }
+  #page-clientes > div > div:first-child{
+    border-right:none;border-bottom:1px solid var(--bd);
+    max-height:240px;
+  }
+}
+
+/* Extra small phones */
+@media(max-width:380px){
+  .ntab{padding:4px 7px;font-size:10px;}
+  .filter-pill{font-size:10px;padding:2px 7px;}
+  .srch input{width:120px;}
 }
 </style>
 </head>
@@ -526,10 +610,10 @@ tr:hover td{background:rgba(61,74,56,.04) !important;}
   </div>
   <div class="nav-tabs">
     <button class="ntab on"  onclick="gotoPage('pipeline',this)">Pipeline</button>
-    <button class="ntab"     onclick="gotoPage('analisis',this)">Análisis</button>
     <button class="ntab"     onclick="gotoPage('clientes',this)">Clientes</button>
     <button class="ntab"     onclick="gotoPage('cotizador',this)">Nueva cotización</button>
     <button class="ntab"     onclick="gotoPage('guardadas',this)">Historial</button>
+    <button class="ntab"     onclick="gotoPage('costeo',this)">Costeo</button>
   </div>
   <div class="nav-right">
     <button class="nav-sync" onclick="showLoading(true);fetchPipeline()" title="Sincronizar con Google Sheets">⟳ Actualizar</button>
@@ -577,6 +661,11 @@ tr:hover td{background:rgba(61,74,56,.04) !important;}
         <option value="red">🔴 Urgente</option>
         <option value="gray">⚪ Sin registro</option>
       </select>
+      <select class="fsel" id="cf-ganable" onchange="colFilters.ganable=this.value;this.classList.toggle('active-filter',!!this.value);renderPipeline()">
+        <option value="">Ganable</option>
+        <option value="si">✓ Ganable</option>
+        <option value="no">✗ No ganable</option>
+      </select>
       <select class="fsel" id="cf-mes" onchange="colFilters.mes=this.value;this.classList.toggle('active-filter',!!this.value);renderPipeline()">
         <option value="">Mes</option>
         <option>ENERO</option><option>FEBRERO</option><option>MARZO</option><option>ABRIL</option><option>MAYO</option>
@@ -598,6 +687,7 @@ tr:hover td{background:rgba(61,74,56,.04) !important;}
         <th style="width:88px;text-align:right" onclick="sortP('monto')" id="th-monto">Monto</th>
         <th style="width:80px" onclick="sortP('ultimo_contacto')" id="th-ultimo_contacto">Último contacto</th>
         <th style="width:80px" onclick="sortP('estatus')" id="th-estatus">Estatus</th>
+        <th style="width:78px" onclick="sortP('ganable')" id="th-ganable">Ganable</th>
         <th style="width:60px" onclick="sortP('moneda')" id="th-moneda">Moneda</th>
         <th style="width:75px" onclick="sortP('fecha')" id="th-fecha">Fecha cot. ↓</th>
         <th style="width:65px" onclick="sortP('mes')" id="th-mes">Mes</th>
@@ -783,9 +873,12 @@ tr:hover td{background:rgba(61,74,56,.04) !important;}
       </div>
       <p class="ferr" id="f-error"></p>
     </div>
-    <div class="mft">
-      <button class="btn-p" onclick="guardarPipeline()">Guardar</button>
-      <button class="btn-o" onclick="cModal()">Cancelar</button>
+    <div class="mft" style="justify-content:space-between;">
+      <div style="display:flex;gap:8px;">
+        <button class="btn-p" onclick="guardarPipeline()">Guardar</button>
+        <button class="btn-o" onclick="cModal()">Cancelar</button>
+      </div>
+      <button class="btn-o" id="btn-eliminar-modal" style="color:var(--red);border-color:var(--red);display:none;" onclick="eliminarDesdeModal()">Eliminar</button>
     </div>
   </div>
 </div>
@@ -805,10 +898,134 @@ tr:hover td{background:rgba(61,74,56,.04) !important;}
 <div id="print-area"></div>
 
 <div class="toast" id="toast"></div>
+<!-- ====== PAGE: COSTEO ====== -->
+<div class="page" id="page-costeo">
+  <style>
+  #page-costeo{overflow:auto;}
+  .cst-wrap{padding:0 0 60px;}
+  .cst-cfg{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-end;
+    padding:14px 20px;background:var(--sur);border-bottom:1px solid var(--bd2);}
+  .cst-f{display:flex;flex-direction:column;gap:4px;}
+  .cst-f label{font-size:9.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--tx3);font-weight:700;}
+  .cst-f input,.cst-f select{font-family:inherit;font-size:13px;font-weight:500;color:var(--tx);
+    border:1px solid var(--bd2);border-radius:var(--r);padding:6px 8px;background:#fff;}
+  .cst-f.sm input{width:74px;}
+  .cst-seg{display:flex;border:1px solid var(--bd2);border-radius:var(--r);overflow:hidden;}
+  .cst-seg button{font-family:inherit;font-size:12px;font-weight:600;border:none;cursor:pointer;padding:6px 12px;background:#fff;color:var(--tx3);}
+  .cst-seg button.on{background:var(--m);color:#fff;}
+  .cst-emb{border-left:1px solid var(--bd2);padding-left:18px;display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;}
+  .cst-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--bd2);border-bottom:1px solid var(--bd2);}
+  .cst-card{background:var(--sur);padding:13px 18px;}
+  .cst-card .k{font-size:9.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--tx3);font-weight:700;}
+  .cst-card .v{font-size:20px;font-weight:800;margin-top:3px;letter-spacing:-.01em;color:var(--tx);font-variant-numeric:tabular-nums;}
+  .cst-card.hi{background:var(--m);} .cst-card.hi .k{color:var(--lime);} .cst-card.hi .v{color:#fff;}
+  .cst-gap .v{display:flex;align-items:baseline;gap:8px;}
+  .cst-gap .obj{font-size:12px;color:var(--tx3);font-weight:700;text-decoration:line-through;}
+  .cst-tblwrap{padding:18px 20px;}
+  .cst-scroll{overflow-x:auto;border:1px solid var(--bd2);border-radius:var(--rl);background:#fff;}
+  table.cst-tbl{border-collapse:collapse;width:100%;min-width:1180px;}
+  .cst-tbl thead th{background:var(--md);color:#fff;font-size:9.5px;font-weight:700;text-transform:uppercase;
+    letter-spacing:.05em;text-align:right;padding:9px 9px;white-space:nowrap;position:sticky;top:0;vertical-align:bottom;line-height:1.25;}
+  .cst-tbl thead th.l{text-align:left;}
+  .cst-tbl thead th .s{display:block;margin-top:2px;font-weight:400;color:rgba(255,255,255,.55);font-size:8.5px;}
+  .cst-tbl tbody td{padding:5px 8px;border-bottom:1px solid var(--bd);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--tx);}
+  .cst-tbl tbody tr:hover{background:var(--sur2);}
+  .cst-tbl td.l{text-align:left;}
+  .cst-tbl input,.cst-tbl select{font-family:inherit;font-size:13px;border:1px solid transparent;border-radius:var(--r);
+    padding:5px 6px;background:transparent;text-align:right;width:100%;color:var(--tx);font-variant-numeric:tabular-nums;}
+  .cst-tbl input.nom{text-align:left;font-weight:500;}
+  .cst-tbl input:hover,.cst-tbl select:hover{border-color:var(--bd2);}
+  .cst-tbl input:focus,.cst-tbl select:focus{outline:none;border-color:var(--m);background:#fff;box-shadow:0 0 0 2px rgba(61,74,56,.12);}
+  .cst-tbl td.venta{font-weight:800;color:var(--m);background:var(--lime-pale);}
+  .cst-tbl td.venta .iva{display:block;font-size:9.5px;font-weight:600;color:var(--tx3);margin-top:1px;}
+  .cst-tbl td.calc{font-weight:600;}
+  .cst-bdg{display:inline-block;border-radius:var(--r);padding:2px 7px;font-size:11px;font-weight:800;font-variant-numeric:tabular-nums;}
+  .cst-bdg.ok{background:var(--gbg);color:var(--grn);}
+  .cst-bdg.med{background:var(--ybg);color:var(--yel);}
+  .cst-bdg.low{background:var(--rbg);color:var(--red);}
+  .cst-fl{display:flex;gap:4px;align-items:center;justify-content:flex-end;}
+  .cst-fl select{width:92px;} .cst-fl input{width:66px;}
+  .cst-fl .tag{font-size:10px;color:var(--tx3);font-style:italic;}
+  .cst-del{border:none;background:none;color:var(--bd2);cursor:pointer;font-size:16px;line-height:1;padding:2px 4px;}
+  .cst-del:hover{color:var(--red);}
+  .cst-tbl tfoot td{padding:11px 9px;border-top:2px solid var(--bd3);font-weight:800;text-align:right;background:var(--sur2);}
+  .cst-tbl tfoot td.l{text-align:left;text-transform:uppercase;font-size:10.5px;letter-spacing:.05em;color:var(--tx3);}
+  .cst-act{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;}
+  .cst-note{margin-top:20px;font-size:12px;color:var(--tx2);line-height:1.6;border-top:1px solid var(--bd);padding-top:14px;max-width:780px;}
+  .cst-note b{color:var(--tx);}
+  </style>
+
+  <div class="ph">
+    <div class="ph-title"><h1>Costeo y rentabilidad</h1><p>Solo tú lo ves · se guarda en este equipo, no se sincroniza al Sheet</p></div>
+    <button class="btn-l" onclick="cstAddRow()">+ Agregar producto</button>
+  </div>
+
+  <div class="cst-wrap">
+    <div class="cst-cfg">
+      <div class="cst-f">
+        <label>Moneda</label>
+        <div class="cst-seg" id="cst-moneda">
+          <button data-m="$" class="on">MXN $</button>
+          <button data-m="USD $">USD $</button>
+        </div>
+      </div>
+      <div class="cst-f sm"><label>Margen objetivo %</label><input type="number" id="cst-margen" value="30" min="0" max="95" step="1"></div>
+      <div class="cst-f sm"><label>Buffer flete %</label><input type="number" id="cst-buffer" value="5" min="0" max="50" step="1"></div>
+      <div class="cst-f"><label>IVA</label>
+        <select id="cst-iva"><option value="0">Sin IVA</option><option value="8" selected>8% frontera</option><option value="16">16%</option></select>
+      </div>
+      <div class="cst-emb">
+        <div class="cst-f sm"><label>Flete total embarque</label><input type="number" id="cst-fembarque" value="0" min="0" step="0.01" style="width:110px"></div>
+        <div class="cst-f"><label>Base de prorrateo</label>
+          <select id="cst-base"><option value="valor">Por valor de material</option><option value="iguales">Partes iguales</option></select>
+        </div>
+      </div>
+    </div>
+
+    <div class="cst-cards" id="cst-cards"></div>
+
+    <div class="cst-tblwrap">
+      <div class="cst-scroll">
+        <table class="cst-tbl">
+          <thead><tr>
+            <th class="l">Producto</th>
+            <th class="l">Unidad<span class="s">de venta</span></th>
+            <th>Cantidad<span class="s">en su unidad</span></th>
+            <th>Costo del proveedor<span class="s">por unidad</span></th>
+            <th>Flete<span class="s">directo o prorrateo</span></th>
+            <th>Margen objetivo<span class="s">% sobre venta</span></th>
+            <th>Precio del material<span class="s">con margen aplicado</span></th>
+            <th>Flete cobrado<span class="s">costo + buffer</span></th>
+            <th>Precio de venta<span class="s">por unidad</span></th>
+            <th>Importe<span class="s">cantidad × precio</span></th>
+            <th>Utilidad<span class="s">por unidad</span></th>
+            <th>Margen real<span class="s">sobre la venta</span></th>
+            <th></th>
+          </tr></thead>
+          <tbody id="cst-tbody"></tbody>
+          <tfoot><tr>
+            <td class="l">Totales</td>
+            <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+            <td id="cst-timporte">—</td><td></td><td id="cst-tmargen">—</td><td></td>
+          </tr></tfoot>
+        </table>
+      </div>
+      <div class="cst-act">
+        <button class="btn-o" onclick="cstApplyMargen()">Aplicar margen objetivo a todos</button>
+        <button class="btn-o" onclick="cstReset()" style="color:var(--red);border-color:var(--red);">Reiniciar</button>
+      </div>
+      <div class="cst-note">
+        <p>El margen se aplica <b>solo al material</b>: precio = costo ÷ (1 − margen). El flete se cobra al costo más un buffer que protege si sube antes de la entrega — no es utilidad. Por eso el <b>margen real sobre venta</b> suele quedar por debajo del objetivo: el flete cobrado al costo diluye el % del ticket. La columna de margen real te muestra ese número verdadero.</p>
+        <p style="margin-top:8px;">En modo <b>prorrateo</b>, el flete total del embarque se reparte entre los productos prorrateados <b>por valor de material</b> — el importe de cada línea (cantidad × costo) — de modo que el material más caro absorbe más flete. La columna <b>Importe</b> y los totales reflejan el embarque real con sus cantidades.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="print-area"></div>
 <script>
 const SK_Q='murotec_quotes_v1';
-const GS_URL='https://script.google.com/macros/s/AKfycbxiNOu6NuB2b03lA-saBTlnqhHmZmdKOd0FZN1e6jkqr8hUWrISsuPmsuYSnXwOf2xNGw/exec';
+const GS_URL='https://script.google.com/macros/s/AKfycbwc5lbsN-8sWRYv6YYzIUj9x8zQQkakOK0XzPpgeduQH_krEcB3CEUJfpaxGA4d9lL1/exec';
 let gsLoaded=false;
 const MESES=['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
 const EMP={nombre:'MUROTEC®',web:'murotecmx.com',tel:'+52 664 674 0628',email:'juanmurgon@murotecmx.com',contacto:'Juan Murillo González',cargo:'Director Comercial'};
@@ -976,18 +1193,17 @@ async function fetchPipeline(){
         gsLoaded = true;
         console.log('Sheets OK:', pipeline.length);
       } else {
-        console.warn('Sheets: filas vacías, usando RAW');
-        pipeline = JSON.parse(JSON.stringify(RAW));
-        if(!gsLoaded) uploadAllToSheet();
+        console.warn('Sheets: todas las filas vacías');
+        // Keep current pipeline (RAW from init)
       }
     } else {
-      pipeline = JSON.parse(JSON.stringify(RAW));
-      if(!gsLoaded) uploadAllToSheet();
+      // Sheet empty or error — keep RAW data already loaded, don't overwrite
+      console.warn('Sheets devolvió datos vacíos — manteniendo datos actuales');
     }
   } catch(e) {
-    showError('Sin conexión a Google Sheets — mostrando datos locales');
-    pipeline = JSON.parse(JSON.stringify(RAW));
-    console.warn('fetchPipeline error:', e);
+    showError('Sin conexión a Sheets — usando datos locales');
+    console.warn('fetchPipeline error:', e.message);
+    // Keep RAW already loaded in init, don't replace
   }
   cotNum = Math.max(...pipeline.map(x=>x.id||0), 0) + 1;
   showLoading(false);
@@ -1007,12 +1223,8 @@ function formatFecha(raw){
 
 
 async function uploadAllToSheet(){
-  showLoading(true);
-  for(const r of pipeline){
-    try{ await fetch(GS_URL,{method:'POST',body:JSON.stringify({action:'add',...r})}); }catch(e){}
-  }
-  gsLoaded=true;
-  showLoading(false);
+  // Disabled - prevents accidentally overwriting Sheets with local RAW data
+  console.log('uploadAllToSheet deshabilitado');
 }
 
 async function gsAdd(r){
@@ -1046,6 +1258,7 @@ function gotoPage(id,btn){
   document.getElementById('page-'+id).classList.add('on');
   btn.classList.add('on');
   if(id==='guardadas') renderSQ();
+  if(id==='costeo') cstRender();
   if(id==='analisis'){renderAnalisisMetrics();renderAnalisis();}
   if(id==='clientes'){
     if(pipeline.length > 0){ renderClientes(); }
@@ -1140,7 +1353,7 @@ function renderPipelineMetrics(){
   document.getElementById('metrics-pipeline').innerHTML=
     '<div class="mcard accent"><div class="mlb">Pipeline ganable BC'+label+'</div><div class="mvl hi">'+fmt(ga.reduce((s,r)=>s+r.monto,0))+'</div><div class="msub">'+ga.length+' cotizaciones abiertas</div></div>'+
     '<div class="mcard"><div class="mlb">Total MXN'+label+'</div><div class="mvl" style="color:var(--m)">'+fmt(totMXN)+'</div><div class="msub">'+base.filter(r=>(r.moneda||'MXN')==='MXN').length+' cotizaciones</div></div>'+
-    '<div class="mcard"><div class="mlb">Total USD'+label+'</div><div class="mvl amb">$'+totUSD.toLocaleString('es-MX',{maximumFractionDigits:0})+'</div><div class="msub">'+base.filter(r=>r.moneda==='USD').length+' cotizaciones USD</div></div>'+
+    '<div class="mcard"><div class="mlb">Total USD'+label+'</div><div class="mvl amb">USD $'+totUSD.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+'</div><div class="msub">'+base.filter(r=>r.moneda==='USD').length+' cotizaciones</div></div>'+
     '<div class="mcard accent" style="border-top-color:var(--lime)"><div class="mlb">Total general equiv. MXN'+label+'</div><div class="mvl hi">'+fmt(totGen)+'</div><div class="msub" style="font-size:9px;">TC FIX $'+tipoCambio.toFixed(2)+' · '+tcFecha+'</div></div>'+
     '<div class="mcard"><div class="mlb">Ventas cerradas'+label+'</div><div class="mvl">'+fmt(gd.reduce((s,r)=>s+(r.comprado||0),0)+fueraVend.reduce((s,r)=>s+(r.comprado||0),0))+'</div><div class="msub">'+gd.length+' BC · '+fueraVend.length+' fuera</div></div>'+
     (rojos>0?'<div class="mcard danger"><div class="mlb">Acción inmediata</div><div class="mvl red">'+rojos+'</div><div class="msub">+6 días sin contacto</div></div>':'');
@@ -1217,7 +1430,7 @@ function renderPipeline(){
   const rows=getPFiltered();
   document.getElementById('cnt-p').textContent=rows.length+' de '+pipeline.length;
   // Update sort indicator
-  document.querySelectorAll('thead th').forEach(th=>{
+  document.querySelectorAll('#page-pipeline thead th').forEach(th=>{
     th.textContent=th.textContent.replace(' ↑','').replace(' ↓','');
   });
   const activeTh=document.getElementById('th-'+fpSort);
@@ -1236,13 +1449,17 @@ function renderPipeline(){
       +'<td style="font-weight:700;color:var(--m);text-align:right">'+fmt(r.monto)+'</td>'
       +'<td>'+semaforoBadge(r)+'</td>'
       +'<td><span class="badge '+(es[r.estatus]||'bg-gr')+'">'+(r.estatus==='En seguimiento'?'Seguim.':r.estatus)+'</span></td>'
+      +(r.ganable
+        ?'<td><span class="badge bg-m" style="font-size:9.5px;">✓ Ganable</span></td>'
+        :'<td><span class="badge bg-gr" style="font-size:9.5px;" title="'+(r.razon||'')+'">No ganable</span></td>')
       +'<td>'+(r.moneda==='USD'?'<span class="badge bg-a">USD</span>':'<span class="badge bg-b">MXN</span>')+'</td>'
       +'<td style="color:var(--tx3);font-size:11px">'+(r.fecha||'—')+'</td>'
       +'<td style="color:var(--tx2);font-size:11px">'+((r.mes||'').substring(0,3))+'</td>'
       +'<td style="color:var(--tx3);font-size:11px">'+zz+'</td>'
       +'<td style="color:var(--tx3);font-size:11px">'+r.no_cot+'</td>'
-      +'<td onclick="event.stopPropagation()">'
-        +(r.estatus==='En seguimiento'?'<button class="btn-grn btn-sm" onclick="registrarContactoHoy('+r.id+')" title="Contactar hoy">✓ Hoy</button>':'')
+      +'<td onclick="event.stopPropagation()" style="white-space:nowrap;">'
+        +(r.estatus==='En seguimiento'?('<button class="btn-grn btn-sm" onclick="registrarContactoHoy('+r.id+')" title="'+(r.ultimo_contacto===new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'})?'Deshacer contacto':'Registrar contacto hoy')+'">'+(r.ultimo_contacto===new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'})?'↩ Hoy':'✓ Hoy')+'</button> '):'')
+        +'<button class="bsm" style="background:var(--bbg);border:1px solid rgba(26,95,168,.2);color:var(--blu);margin-left:2px;" onclick="abrirBitacora('+r.id+')" title="Agregar nota de seguimiento">📝</button>'
         +'<button class="bsm bed" onclick="abrirEditar('+r.id+')" title="Editar" style="margin-left:2px">✏</button>'
       +'</td>'
     +'</tr>';}).join('');
@@ -1266,7 +1483,7 @@ function renderAnalisisMetrics(){
     '<div class="mcard"><div class="mlb">BC — ventas cerradas</div><div class="mvl">'+fmt(bcCerr.reduce((s,r)=>s+(r.comprado||0),0))+'</div><div class="msub">'+bcCerr.length+' cierres</div></div>'+
     '<div class="mcard"><div class="mlb">Fuera — ventas cerradas</div><div class="mvl">'+fmt(fueraVend.reduce((s,r)=>s+(r.comprado||0),0))+'</div><div class="msub">'+fueraVend.length+' cierres fuera</div></div>'+
     '<div class="mcard"><div class="mlb">Total MXN</div><div class="mvl" style="color:var(--m)">'+fmt(totMXN)+'</div><div class="msub">'+pipeline.filter(r=>(r.moneda||'MXN')==='MXN').length+' cotizaciones</div></div>'+
-    '<div class="mcard"><div class="mlb">Total USD</div><div class="mvl amb">$'+totUSD.toLocaleString('es-MX',{maximumFractionDigits:0})+'</div><div class="msub">'+pipeline.filter(r=>r.moneda==='USD').length+' cotizaciones</div></div>'+
+    '<div class="mcard"><div class="mlb">Total USD</div><div class="mvl amb">USD $'+totUSD.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+'</div><div class="msub">'+pipeline.filter(r=>r.moneda==='USD').length+' cotizaciones</div></div>'+
     '<div class="mcard accent" style="border-top-color:var(--lime)"><div class="mlb">Total general MXN</div><div class="mvl hi">'+fmt(totGen)+'</div><div class="msub" style="font-size:9px;">TC $'+tipoCambio.toFixed(2)+' · '+tcFecha+'</div></div>';
 }
 
@@ -1356,7 +1573,7 @@ function verDetalle(id){
   if(actEl)actEl.innerHTML=
     btnVer
     +(r.estatus==='En seguimiento'
-      ?'<button class="btn-p" style="background:var(--grn);width:100%;padding:9px;" onclick="registrarContactoHoy('+r.id+')">✓ Contacté hoy</button>'
+      ?(()=>{const hoy=new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'});const yaHoy=r.ultimo_contacto===hoy;return '<button class="btn-p" style="background:'+(yaHoy?'var(--tx2)':'var(--grn)')+';width:100%;padding:9px;" onclick="registrarContactoHoy('+r.id+')">'+(yaHoy?'↩ Deshacer contacto de hoy':'✓ Contacté hoy')+'</button>';})()
       :'')
     +'<button class="btn-p" style="width:100%;padding:8px;" onclick="abrirEditar('+r.id+');cPanel()">Editar cotización</button>'
     +'<button class="btn-o" style="width:100%;padding:8px;color:var(--red);" onclick="delPipeline('+r.id+');cPanel()">Eliminar</button>';
@@ -1369,13 +1586,13 @@ function cPanel(){document.getElementById('pol').classList.remove('on');document
 // ---- MODAL PIPELINE ----
 function togFRazon(){document.getElementById('f-razon-wrap').style.display=document.getElementById('f-ganable').value==='no'?'block':'none';}
 function clrForm(){['f-nocot','f-empresa','f-nombre','f-material','f-monto','f-comprado','f-comentario'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('f-mes').value='ENERO';const _fd=document.getElementById('f-fecha');if(_fd)_fd.value='';const _uc=document.getElementById('f-ultimo-contacto');if(_uc)_uc.value='';document.getElementById('f-zona').value='Baja California';document.getElementById('f-estatus').value='En seguimiento';document.getElementById('f-ganable').value='si';document.getElementById('f-razon-wrap').style.display='none';document.getElementById('f-error').textContent='';}
-function abrirNuevo(){editId=null;clrForm();document.getElementById('mtitle').textContent='Agregar al pipeline';document.getElementById('ovl').classList.add('on');}
+function abrirNuevo(){editId=null;clrForm();document.getElementById('mtitle').textContent='Agregar al pipeline';const bel=document.getElementById('btn-eliminar-modal');if(bel)bel.style.display='none';document.getElementById('ovl').classList.add('on');}
 function abrirEditar(id){
   const r=pipeline.find(x=>x.id===id);if(!r)return;editId=id;clrForm();
   document.getElementById('f-nocot').value=r.no_cot||'';document.getElementById('f-empresa').value=r.empresa||'';document.getElementById('f-nombre').value=r.nombre||'';document.getElementById('f-material').value=r.material||'';document.getElementById('f-monto').value=r.monto||'';document.getElementById('f-comprado').value=r.comprado||'';document.getElementById('f-mes').value=r.mes||'ENERO';document.getElementById('f-zona').value=r.zona||'Baja California';document.getElementById('f-estatus').value=r.estatus||'En seguimiento';document.getElementById('f-ganable').value=r.ganable?'si':'no';document.getElementById('f-razon-wrap').style.display=r.ganable?'none':'block';if(r.razon)document.getElementById('f-razon').value=r.razon;const _fm=document.getElementById('f-moneda');if(_fm)_fm.value=r.moneda||'MXN';document.getElementById('f-comentario').value=r.comentario||'';
   if(r.fecha){const p=r.fecha.split('/');if(p.length===3){const fd=document.getElementById('f-fecha');if(fd)fd.value=p[2]+'-'+p[1]+'-'+p[0];}}
   if(r.ultimo_contacto){const p=r.ultimo_contacto.split('/');if(p.length===3){const uc=document.getElementById('f-ultimo-contacto');if(uc)uc.value=p[2]+'-'+p[1]+'-'+p[0];}}
-  document.getElementById('mtitle').textContent='Editar — '+r.no_cot;document.getElementById('ovl').classList.add('on');
+  document.getElementById('mtitle').textContent='Editar — '+r.no_cot;const bel=document.getElementById('btn-eliminar-modal');if(bel)bel.style.display='block';document.getElementById('ovl').classList.add('on');
 }
 function cModal(e){if(e&&e.target!==document.getElementById('ovl'))return;document.getElementById('ovl').classList.remove('on');}
 function guardarPipeline(){
@@ -1394,14 +1611,36 @@ function guardarPipeline(){
 function registrarContactoHoy(id){
   const r = pipeline.find(x=>x.id===id);
   if(!r) return;
+  // Toggle: if already registered today, undo it
   const hoy = new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'});
-  r.ultimo_contacto = hoy;
-  gsUpdate(r);
+  if(r.ultimo_contacto === hoy){
+    r.ultimo_contacto = '';
+    gsUpdate(r);
+    renderPipeline();
+    renderAnalisisMetrics();
+    if(document.getElementById('spanel').classList.contains('on')) verDetalle(id);
+    toast('↩ Contacto deshecho');
+  } else {
+    r.ultimo_contacto = hoy;
+    gsUpdate(r);
+    renderPipeline();
+    renderAnalisisMetrics();
+    if(document.getElementById('spanel').classList.contains('on')) verDetalle(id);
+    toast('✓ Contacto registrado — ' + hoy);
+  }
+}
+
+function eliminarDesdeModal(){
+  if(!editId) return;
+  if(!confirm('¿Eliminar esta cotización?')) return;
+  pipeline = pipeline.filter(x => x.id !== editId);
+  gsDelete(editId);
+  cModal();
   renderPipeline();
   renderAnalisisMetrics();
-  // Refresh panel
-  verDetalle(id);
-  toast('✓ Contacto registrado — ' + hoy);
+  renderAnalisis();
+  toast('Cotización eliminada');
+  editId = null;
 }
 
 function delPipeline(id){if(!confirm('¿Eliminar?'))return;pipeline=pipeline.filter(x=>x.id!==id);gsDelete(id);renderPipeline();renderAnalisis();toast('Eliminada');}
@@ -1617,36 +1856,30 @@ function guardarCot(){
 
 function imprimirCot(q){
   const html = buildCotHTML(q,false);
-  const win = window.open('','_blank','width=820,height=1060');
-  win.document.write(`<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Cotización ${q.no_cot||''} — MUROTEC®</title>
-  <style>
-    * { box-sizing:border-box; margin:0; padding:0; }
-    body { font-family:Arial,sans-serif; background:#fff; color:#333; }
-    @page {
-      size: letter;
-      margin: 8mm 10mm;
+  const doc = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Cotización ${q.no_cot||''} — MUROTEC®</title><style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Arial,sans-serif;background:#fff;color:#333;}@page{size:letter;margin:8mm 10mm;}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}</style></head><body style="-webkit-print-color-adjust:exact;print-color-adjust:exact;">${html}</body></html>`;
+  // Imprime dentro de un iframe oculto: NO depende de ventanas emergentes (popups)
+  let f=document.getElementById('cot-print-frame');
+  if(f) f.remove();
+  f=document.createElement('iframe');
+  f.id='cot-print-frame';
+  f.setAttribute('style','position:fixed;right:0;bottom:0;width:0;height:0;border:0;');
+  document.body.appendChild(f);
+  f.onload=()=>{ setTimeout(()=>{
+    try{ f.contentWindow.focus(); f.contentWindow.print(); }
+    catch(err){
+      const w=window.open('','_blank');
+      if(w){ w.document.write(doc); w.document.close(); setTimeout(()=>{w.focus();w.print();},500); }
+      else { alert('Tu navegador bloqueó la impresión. Permite ventanas emergentes para este sitio e intenta de nuevo.'); }
     }
-    @media print {
-      body { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-      /* Hide browser auto-generated header/footer */
-      html { -webkit-print-color-adjust: exact; }
-    }
-  </style>
-</head>
-<body style="-webkit-print-color-adjust:exact;print-color-adjust:exact;">${html}
-`);
-  win.document.close();
-  setTimeout(()=>{ win.focus(); win.print(); }, 700);
+  }, 300); };
+  f.srcdoc=doc;
 }
 function renderSQ(){
   const el=document.getElementById('sq-wrap');
   if(!quotes.length){el.innerHTML='<div class="empty"><p>📋</p><p style="font-size:15px;font-weight:600;margin-bottom:4px">Sin cotizaciones guardadas</p><p>Genera tu primera cotización</p></div>';return;}
   el.innerHTML=quotes.slice().reverse().map(q=>`<div class="sq-item"><div><p style="font-size:13px;font-weight:500">${q.no_cot} — ${q.empresa}</p><p style="font-size:11px;color:var(--tx2)">${q.fecha} · ${fmtF(q.total)} · ${q.items.length} producto${q.items.length!==1?'s':''}</p></div><div style="display:flex;gap:6px;flex-shrink:0"><button class="bsm bed" onclick='imprimirCot(${JSON.stringify(q).replace(/'/g,"&#39;")})'>↓ PDF</button><button class="bsm bdl" onclick="delQ(${q.id})">×</button></div></div>`).join('');
 }
+function saveQ(){ try{ localStorage.setItem(SK_Q, JSON.stringify(quotes)); }catch(e){ console.warn('No se pudo guardar el historial local:', e.message); } }
 function delQ(id){if(!confirm('¿Eliminar?'))return;quotes=quotes.filter(q=>q.id!==id);saveQ();renderSQ();toast('Eliminada');}
 
 function renderBitacora(notas){
@@ -1795,9 +2028,261 @@ function selCli(i){
   if(wrap) wrap.innerHTML = dHtml;
 }
 
+// ── BITÁCORA RÁPIDA ───────────────────────
+function cerrarBitacoraModal(){
+  const m=document.getElementById('bitacora-modal');
+  if(m)m.remove();
+}
+
+function abrirBitacora(id){
+  const r = pipeline.find(x=>x.id===id);
+  if(!r) return;
+
+  // Remove existing modal if any
+  const existing = document.getElementById('bitacora-modal');
+  if(existing) existing.remove();
+
+  const notas = r.bitacora||[];
+  const histHTML = notas.length
+    ? notas.slice().reverse().map(n =>
+        '<div style="padding:8px 0;border-bottom:1px solid var(--bd);display:flex;flex-direction:column;gap:3px;">'
+        +'<div style="display:flex;align-items:center;gap:8px;">'
+          +'<span style="font-size:9.5px;font-weight:700;color:var(--tx3);font-variant-numeric:tabular-nums;">'+n.fecha+'</span>'
+          +'<span style="font-size:9px;color:var(--lime2);font-weight:700;text-transform:uppercase;letter-spacing:.04em;">· Juan Murillo</span>'
+        +'</div>'
+        +'<div style="font-size:12px;color:var(--tx2);white-space:pre-wrap;line-height:1.4;">'+n.texto+'</div>'
+        +'</div>'
+      ).join('')
+    : '<p style="font-size:11px;color:var(--tx3);font-style:italic;padding:8px 0;">Sin notas aún.</p>';
+
+  const modal = document.createElement('div');
+  modal.id = 'bitacora-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(26,32,27,.5);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px);';
+  modal.innerHTML =
+    '<div style="background:var(--sur);border-radius:var(--rl);width:100%;max-width:480px;max-height:85vh;display:flex;flex-direction:column;box-shadow:var(--shadow-md);border:1px solid var(--bd);" onclick="event.stopPropagation()">'
+      +'<div style="background:var(--m);padding:12px 16px;border-radius:var(--rl) var(--rl) 0 0;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">'
+        +'<div>'
+          +'<div style="color:#fff;font-size:13px;font-weight:700;">Bitácora de seguimiento</div>'
+          +'<div style="color:rgba(255,255,255,.6);font-size:11px;margin-top:1px;">'+r.empresa+'</div>'
+        +'</div>'
+        +'<button onclick="cerrarBitacoraModal()" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:24px;height:24px;border-radius:3px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;">×</button>'
+      +'</div>'
+      +'<div style="padding:14px 16px;flex-shrink:0;border-bottom:1px solid var(--bd);">'
+        +'<textarea id="nota-rapida-'+id+'" style="width:100%;padding:8px 10px;border:1px solid var(--bd2);border-radius:var(--r);font-family:Inter,sans-serif;font-size:12px;color:var(--tx);resize:none;min-height:72px;line-height:1.4;" placeholder="Escribe tu nota de seguimiento..."></textarea>'
+        +'<button onclick="guardarNotaRapida('+id+')" style="margin-top:8px;width:100%;background:var(--m);color:#fff;border:none;padding:9px;border-radius:var(--r);font-family:Inter,sans-serif;font-size:12px;font-weight:600;cursor:pointer;">+ Agregar nota</button>'
+      +'</div>'
+      +'<div style="padding:12px 16px;overflow-y:auto;flex:1;" id="bitacora-hist-'+id+'">'
+        +'<div style="font-size:9px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px;">Historial</div>'
+        +histHTML
+      +'</div>'
+    +'</div>';
+
+  modal.addEventListener('click', function(e){ if(e.target===modal) modal.remove(); });
+  document.body.appendChild(modal);
+  setTimeout(()=>{ const ta=document.getElementById('nota-rapida-'+id); if(ta)ta.focus(); }, 100);
+}
+
+function guardarNotaRapida(id){
+  const r = pipeline.find(x=>x.id===id);
+  if(!r) return;
+  const input = document.getElementById('nota-rapida-'+id);
+  if(!input) return;
+  const texto = input.value.trim();
+  if(!texto) return;
+  if(!r.bitacora) r.bitacora = [];
+  const ahora = new Date();
+  const fecha = ahora.toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'})
+    + ' ' + ahora.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+  r.bitacora.push({fecha, texto});
+  gsUpdate(r);
+  input.value = '';
+  // Refresh historial in modal
+  const hist = document.getElementById('bitacora-hist-'+id);
+  if(hist){
+    const notas = r.bitacora.slice().reverse();
+    hist.innerHTML = '<div style="font-size:9px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px;">Historial</div>'
+      + notas.map(n =>
+          '<div style="padding:8px 0;border-bottom:1px solid var(--bd);display:flex;flex-direction:column;gap:3px;">'
+          +'<div style="display:flex;align-items:center;gap:8px;">'
+            +'<span style="font-size:9.5px;font-weight:700;color:var(--tx3);font-variant-numeric:tabular-nums;">'+n.fecha+'</span>'
+            +'<span style="font-size:9px;color:var(--lime2);font-weight:700;text-transform:uppercase;letter-spacing:.04em;">· Juan Murillo</span>'
+          +'</div>'
+          +'<div style="font-size:12px;color:var(--tx2);white-space:pre-wrap;line-height:1.4;">'+n.texto+'</div>'
+          +'</div>'
+        ).join('');
+  }
+  renderPipeline();
+  toast('Nota agregada');
+}
+
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
 
 
+
+/* ====== MÓDULO COSTEO (local, no sincroniza) ====== */
+const CST_KEY='murotec_costeo_v1';
+const cstDefaults={moneda:'$',margen:30,buffer:5,iva:8,fembarque:0,base:'valor',rows:[
+  {id:cstRid(),nom:'Geotextil NT 200 PET',unidad:'m2',cant:200,costo:18.50,fmode:'directo',fdir:1.20,margen:30},
+  {id:cstRid(),nom:'Geomalla biaxial BX 2020',unidad:'rollo',cant:5,costo:42.00,fmode:'prorrateo',fdir:0,margen:35},
+  {id:cstRid(),nom:'Geomembrana HDPE 1.0 mm',unidad:'m2',cant:80,costo:64.00,fmode:'prorrateo',fdir:0,margen:28}
+]};
+let cstState=JSON.parse(JSON.stringify(cstDefaults));
+let cstReady=false;
+
+function cstRid(){return 'p'+Math.random().toString(36).slice(2,9);}
+function cstNum(v){const n=parseFloat(v);return isFinite(n)?n:0;}
+function cstFmt(n){return cstState.moneda+(isFinite(n)?n:0).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function cstPct(n){return (isFinite(n)?n:0).toLocaleString('es-MX',{minimumFractionDigits:1,maximumFractionDigits:1})+'%';}
+function cstEsc(s){return String(s).replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+
+function cstSave(){try{localStorage.setItem(CST_KEY,JSON.stringify(cstState));}catch(e){}}
+function cstLoad(){try{const r=localStorage.getItem(CST_KEY);if(r)cstState=JSON.parse(r);}catch(e){}}
+
+function cstInit(){
+  cstLoad();
+  cstState.rows.forEach(r=>{ if(!r.unidad) r.unidad='rollo'; if(!('cant' in r)||!isFinite(r.cant)) r.cant=1; if('peso' in r) delete r.peso; });
+  if(cstState.base==='peso'||cstState.base==='cantidad') cstState.base='valor';
+  const $=id=>document.getElementById(id);
+  $('cst-margen').value=cstState.margen; $('cst-buffer').value=cstState.buffer;
+  $('cst-iva').value=cstState.iva; $('cst-fembarque').value=cstState.fembarque; $('cst-base').value=cstState.base;
+  document.querySelectorAll('#cst-moneda button').forEach(b=>b.classList.toggle('on',b.dataset.m===cstState.moneda));
+  // listeners config
+  [['cst-margen','margen'],['cst-buffer','buffer'],['cst-iva','iva'],['cst-fembarque','fembarque'],['cst-base','base']].forEach(([id,key])=>{
+    $(id).addEventListener('input',e=>{cstState[key]=(key==='base')?e.target.value:cstNum(e.target.value);cstRecompute();});
+  });
+  document.querySelectorAll('#cst-moneda button').forEach(b=>b.addEventListener('click',()=>{
+    cstState.moneda=b.dataset.m;
+    document.querySelectorAll('#cst-moneda button').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');cstRecompute();
+  }));
+  // listeners tabla (delegados)
+  $('cst-tbody').addEventListener('input',e=>{
+    const tr=e.target.closest('tr');if(!tr)return;
+    const row=cstState.rows.find(x=>x.id===tr.dataset.id);if(!row)return;
+    const f=e.target.dataset.f;if(!f)return;
+    row[f]=(f==='nom'||f==='fmode'||f==='unidad')?e.target.value:cstNum(e.target.value);
+    if(f==='fmode'){
+      const inp=tr.querySelector('[data-f="fdir"]'); const tag=tr.querySelector('.cst-ftag');
+      inp.style.display=row.fmode==='prorrateo'?'none':''; tag.style.display=row.fmode==='prorrateo'?'':'none';
+    }
+    cstRecompute();
+  });
+  $('cst-tbody').addEventListener('click',e=>{
+    if(e.target.classList.contains('cst-del')){
+      const tr=e.target.closest('tr');
+      cstState.rows=cstState.rows.filter(x=>x.id!==tr.dataset.id); cstRender();
+    }
+  });
+  cstReady=true;
+  cstRender();
+}
+
+function cstFleteMap(){
+  const map={};
+  const pror=cstState.rows.filter(x=>x.fmode==='prorrateo');
+  const total=cstNum(cstState.fembarque);
+  const ws=pror.map(x=>cstState.base==='valor'?Math.max(0,cstNum(x.cant)*cstNum(x.costo)):1);
+  const sum=ws.reduce((a,b)=>a+b,0);
+  pror.forEach((x,i)=>{
+    const rowTotal=sum>0?total*(ws[i]/sum):0;
+    const c=Math.max(0,cstNum(x.cant));
+    map[x.id]=c>0?rowTotal/c:0;
+  });
+  cstState.rows.filter(x=>x.fmode==='directo').forEach(x=>{map[x.id]=Math.max(0,cstNum(x.fdir));});
+  return map;
+}
+function cstCalc(row,fU){
+  const m=Math.min(0.95,Math.max(0,cstNum(row.margen)/100));
+  const mat=cstNum(row.costo)/(1-m);
+  const fcob=fU*(1+cstNum(cstState.buffer)/100);
+  const venta=mat+fcob;
+  const util=venta-cstNum(row.costo)-fU;
+  const real=venta>0?util/venta*100:0;
+  return {mat,fcob,venta,util,real};
+}
+
+function cstRender(){
+  if(!cstReady){return;}
+  const tb=document.getElementById('cst-tbody'); if(!tb)return;
+  tb.innerHTML='';
+  cstState.rows.forEach(row=>{
+    const tr=document.createElement('tr'); tr.dataset.id=row.id;
+    tr.innerHTML=
+      '<td class="l"><input class="nom" data-f="nom" value="'+cstEsc(row.nom)+'" placeholder="Nombre del producto"></td>'+
+      '<td class="l"><select data-f="unidad">'+
+        '<option value="rollo"'+(row.unidad==='rollo'?' selected':'')+'>rollo</option>'+
+        '<option value="m2"'+(row.unidad==='m2'?' selected':'')+'>m²</option>'+
+        '<option value="ml"'+(row.unidad==='ml'?' selected':'')+'>ml</option>'+
+      '</select></td>'+
+      '<td><input type="number" step="0.01" data-f="cant" value="'+row.cant+'"></td>'+
+      '<td><input type="number" step="0.01" data-f="costo" value="'+row.costo+'"></td>'+
+      '<td><div class="cst-fl">'+
+        '<select data-f="fmode"><option value="directo"'+(row.fmode==='directo'?' selected':'')+'>Directo</option><option value="prorrateo"'+(row.fmode==='prorrateo'?' selected':'')+'>Prorrateo</option></select>'+
+        '<input type="number" step="0.01" data-f="fdir" value="'+row.fdir+'"'+(row.fmode==='prorrateo'?' style="display:none"':'')+'>'+
+        '<span class="tag cst-ftag"'+(row.fmode==='directo'?' style="display:none"':'')+'></span>'+
+      '</div></td>'+
+      '<td><input type="number" step="1" data-f="margen" value="'+row.margen+'"></td>'+
+      '<td class="calc cst-mat"></td>'+
+      '<td class="calc cst-fcob"></td>'+
+      '<td class="venta"><span class="cst-venta"></span><span class="iva cst-iva"></span></td>'+
+      '<td class="calc cst-importe"></td>'+
+      '<td class="calc cst-util"></td>'+
+      '<td><span class="cst-bdg cst-real"></span></td>'+
+      '<td><button class="cst-del" title="Quitar">×</button></td>';
+    tb.appendChild(tr);
+  });
+  cstRecompute();
+}
+
+function cstRecompute(){
+  if(!cstReady)return;
+  const map=cstFleteMap();
+  const ivaF=cstNum(cstState.iva)/100;
+  let tVenta=0,tUtil=0,tMat=0,tCostMat=0,tImporte=0;
+  cstState.rows.forEach(row=>{
+    const fU=map[row.id]||0; const c=cstCalc(row,fU); const q=Math.max(0,cstNum(row.cant));
+    const importe=q*c.venta;
+    const tr=document.querySelector('#cst-tbody tr[data-id="'+row.id+'"]'); if(!tr)return;
+    tr.querySelector('.cst-mat').textContent=cstFmt(c.mat);
+    tr.querySelector('.cst-fcob').textContent=cstFmt(c.fcob);
+    tr.querySelector('.cst-venta').textContent=cstFmt(c.venta);
+    tr.querySelector('.cst-iva').textContent=ivaF>0?('c/IVA '+cstFmt(c.venta*(1+ivaF))):'';
+    tr.querySelector('.cst-importe').textContent=cstFmt(importe);
+    tr.querySelector('.cst-util').textContent=cstFmt(c.util);
+    const b=tr.querySelector('.cst-real'); b.textContent=cstPct(c.real);
+    b.className='cst-bdg cst-real '+(c.real>=25?'ok':c.real>=15?'med':'low');
+    const tag=tr.querySelector('.cst-ftag'); if(tag)tag.textContent=row.fmode==='prorrateo'?cstFmt(fU):'';
+    tVenta+=importe; tUtil+=q*c.util; tMat+=q*c.mat; tCostMat+=q*cstNum(row.costo); tImporte+=importe;
+  });
+  const g=id=>document.getElementById(id);
+  g('cst-timporte').textContent=cstFmt(tImporte);
+  const real=tVenta>0?tUtil/tVenta*100:0;
+  g('cst-tmargen').innerHTML='<span class="cst-bdg '+(real>=25?'ok':real>=15?'med':'low')+'">'+cstPct(real)+'</span>';
+  const objMat=tMat>0?(tMat-tCostMat)/tMat*100:0;
+  const costoEmbarque=tImporte-tUtil;
+  cstCards(tImporte,tUtil,real,objMat,ivaF,costoEmbarque);
+  cstSave();
+}
+
+function cstCards(venta,util,real,obj,ivaF,costo){
+  const c=document.getElementById('cst-cards'); if(!c)return;
+  c.innerHTML=
+    '<div class="cst-card"><div class="k">Costo total del embarque</div><div class="v">'+cstFmt(costo)+'</div></div>'+
+    '<div class="cst-card"><div class="k">Venta total (subtotal)</div><div class="v">'+cstFmt(venta)+'</div></div>'+
+    '<div class="cst-card"><div class="k">'+(ivaF>0?('Total c/ IVA '+(ivaF*100)+'%'):'IVA')+'</div><div class="v">'+(ivaF>0?cstFmt(venta*(1+ivaF)):'—')+'</div></div>'+
+    '<div class="cst-card hi"><div class="k">Utilidad total</div><div class="v">'+cstFmt(util)+'</div></div>'+
+    '<div class="cst-card cst-gap"><div class="k">Margen real s/ venta</div><div class="v"><span>'+cstPct(real)+'</span><span class="obj">obj '+cstPct(obj)+'</span></div></div>';
+}
+
+function cstAddRow(){
+  cstState.rows.push({id:cstRid(),nom:'',unidad:'rollo',cant:1,costo:0,fmode:'directo',fdir:0,margen:cstNum(cstState.margen)});
+  cstRender();
+  const last=document.querySelector('#cst-tbody tr:last-child .nom'); if(last)last.focus();
+}
+function cstApplyMargen(){cstState.rows.forEach(x=>x.margen=cstNum(cstState.margen));cstRender();}
+function cstReset(){if(confirm('¿Reiniciar a los datos de ejemplo? Se perderá lo capturado en este equipo.')){cstState=JSON.parse(JSON.stringify(cstDefaults));cstInit();}}
+
+cstInit();
 init();
 </script>
 </body>
