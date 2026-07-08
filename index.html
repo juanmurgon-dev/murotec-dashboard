@@ -460,7 +460,8 @@ tr:hover td{background:rgba(56,58,53,.04) !important;}
 </style>
 </head>
 <body>
-<div id="build-stamp" style="position:fixed;bottom:3px;right:6px;font-size:8px;color:var(--tx3);opacity:.55;z-index:99999;font-family:monospace;pointer-events:none;">build 2026-07-07 20:36</div>
+<div id="build-stamp" style="position:fixed;bottom:3px;right:6px;font-size:8px;color:var(--tx3);opacity:.55;z-index:99999;font-family:monospace;pointer-events:none;">build 2026-07-07 20:41</div>
+
 
 <nav class="nav">
   <div style="display:flex;align-items:center;">
@@ -571,6 +572,7 @@ tr:hover td{background:rgba(56,58,53,.04) !important;}
         <th style="width:160px" onclick="sortProd('vendidas')">Vendidas</th>
         <th style="width:120px;text-align:right" onclick="sortProd('montoVen')">$ Vendido (eq. MXN)</th>
         <th style="width:95px" onclick="sortProd('conv')">Conversión</th>
+        <th style="width:90px" onclick="sortProd('pctGan')">% Ganable</th>
       </tr></thead>
       <tbody id="tbody-prod"></tbody>
     </table>
@@ -1351,12 +1353,13 @@ function buildProductos(){
     const limpio=normProducto(r.material);
     const nombre=limpio||'(Sin material)';
     const key=prodKey(nombre)||'SINMATERIAL';
-    if(!map[key])map[key]={names:{},cotiz:0,vendidas:0,montoCot:0,montoVen:0};
+    if(!map[key])map[key]={names:{},cotiz:0,vendidas:0,montoCot:0,montoVen:0,montoGan:0,ganCount:0};
     const o=map[key];
     o.names[nombre]=(o.names[nombre]||0)+1;
     o.cotiz++;
     const monto=parseFloat(r.monto)||0;
     o.montoCot+=(r.moneda==='USD'?monto*tipoCambio:monto);
+    if(r.ganable){o.ganCount++;o.montoGan+=(r.moneda==='USD'?monto*tipoCambio:monto);}
     const comp=parseFloat(r.comprado)||0;
     if(comp>0){o.vendidas++;o.montoVen+=(r.moneda==='USD'?comp*tipoCambio:comp);}
   });
@@ -1365,7 +1368,7 @@ function buildProductos(){
     const disp=Object.keys(o.names).sort((a,b)=>o.names[b]-o.names[a])[0];
     return {key:k,nombre:disp,variantes:Object.keys(o.names).length,
       cotiz:o.cotiz,vendidas:o.vendidas,montoCot:o.montoCot,montoVen:o.montoVen,
-      conv:o.cotiz?o.vendidas/o.cotiz:0};
+      conv:o.cotiz?o.vendidas/o.cotiz:0,montoGan:o.montoGan,ganCount:o.ganCount,pctGan:o.montoCot?o.montoGan/o.montoCot:0};
   });
 }
 let prodSort='cotiz', prodDir='desc';
@@ -1409,6 +1412,8 @@ function renderProductos(){
   const rows=arr.map(function(p){
     const convPct=Math.round(p.conv*100);
     const convColor=convPct>=40?'var(--grn)':convPct>=15?'var(--amb)':'var(--red)';
+    const ganPct=Math.round(p.pctGan*100);
+    const ganColor=ganPct>=50?'var(--grn)':ganPct>=25?'var(--m)':'var(--tx2)';
     const variBadge=p.variantes>1?' <span title="'+p.variantes+' variantes de nombre agrupadas" style="font-size:9px;color:var(--tx3);font-weight:600;">('+p.variantes+')</span>':'';
     return '<tr>'+
       '<td style="font-weight:600;">'+p.nombre+variBadge+'</td>'+
@@ -1417,9 +1422,10 @@ function renderProductos(){
       '<td>'+bar(p.vendidas,maxV,'var(--lime)')+'</td>'+
       '<td style="text-align:right;font-variant-numeric:tabular-nums;color:var(--tx2);">'+fmt(p.montoVen)+'</td>'+
       '<td><span style="font-weight:800;color:'+convColor+';">'+convPct+'%</span></td>'+
+      '<td><span style="font-weight:800;color:'+ganColor+';" title="'+p.ganCount+' de '+p.cotiz+' cotizaciones · '+fmt(p.montoGan)+'">'+ganPct+'%</span></td>'+
     '</tr>';
   }).join('');
-  document.getElementById('tbody-prod').innerHTML=rows||'<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--tx3);">Sin productos</td></tr>';
+  document.getElementById('tbody-prod').innerHTML=rows||'<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--tx3);">Sin productos</td></tr>';
   const cnt=document.getElementById('cnt-prod');if(cnt)cnt.textContent=totProd+' productos';
 }
 function renderAnalisisMetrics(){
