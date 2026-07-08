@@ -744,7 +744,8 @@ async function fetchTipoCambio(){
 async function fetchTCBanxico(){
   const banxicoUrl = `https://www.banxico.org.mx/SieAPIRest/service/v1/series/SF43718/datos/oportuno?token=${BANXICO_TOKEN}`;
   const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(banxicoUrl)}`;
-  const res = await fetch(proxyUrl);
+  const _ctrl=new AbortController();const _to=setTimeout(()=>_ctrl.abort(),4500);
+  const res = await fetch(proxyUrl,{signal:_ctrl.signal});clearTimeout(_to);
   const outer = await res.json();
   const data = JSON.parse(outer.contents);
   const dato = data?.bmx?.series?.[0]?.datos?.[0];
@@ -785,7 +786,8 @@ function init(){
   try{const q=localStorage.getItem(SK_Q);quotes=q?JSON.parse(q):[];}catch(e){quotes=[];}
   addItem(); updPrev();
   showLoading(true);
-  fetchTipoCambio().then(()=>fetchPipeline());
+  fetchPipeline();      // datos principales primero, en paralelo
+  fetchTipoCambio();   // el TC actualiza las métricas cuando llega
 }
 function showLoading(on){
   let el=document.getElementById('gs-loading');
@@ -1204,9 +1206,14 @@ function buildCotHTML(q, preview=false){
     </div>
   </div>`;
 }
+let _prevTimer=null;
 function updPrev(){
-  const items=getItems();const iva=parseFloat(V('c-iva')||0.16);
   cotItems.forEach((item,idx)=>{if(!item)return;const t=document.getElementById('it-'+idx);if(t)t.value=fmtF(item.cant*item.precio);});
+  clearTimeout(_prevTimer);
+  _prevTimer=setTimeout(renderPreview,220);
+}
+function renderPreview(){
+  const items=getItems();const iva=parseFloat(V('c-iva')||0.16);
   const sub=items.reduce((s,i)=>s+i.cant*i.precio,0);const ivaAmt=sub*iva;const total=sub+ivaAmt;
   const q={
     no_cot:V('c-folio')||nextFolio(),
