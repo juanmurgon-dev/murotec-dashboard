@@ -370,8 +370,9 @@ tr:hover td{background:rgba(56,58,53,.04) !important;}
 .card-body{padding:14px;}
 .item-hdr{display:grid;grid-template-columns:2fr 80px 70px 90px 90px 28px;gap:5px;margin-bottom:4px;}
 .item-hdr span{font-size:8.5px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.09em;}
-.item-row{display:grid;grid-template-columns:2fr 80px 70px 90px 90px 28px;gap:5px;align-items:end;margin-bottom:6px;}
-.item-row input,.item-row select{padding:6px 7px;border:1px solid var(--bd2);border-radius:var(--r);font-family:'Red Hat Display',sans-serif;font-size:11px;color:var(--tx);width:100%;}
+.item-row{display:grid;grid-template-columns:minmax(0,1.7fr) 66px 58px 82px 96px 26px;gap:5px;align-items:end;margin-bottom:6px;}
+.item-row input,.item-row select{padding:6px 7px;border:1px solid var(--bd2);border-radius:var(--r);font-family:'Red Hat Display',sans-serif;font-size:11px;color:var(--tx);width:100%;min-width:0;}
+.item-row input[readonly]{background:var(--lime-pale);font-weight:700;color:var(--m);text-align:right;}
 .item-row input:focus,.item-row select:focus{outline:none;border-color:var(--m);}
 .btn-rm{background:none;border:none;color:var(--tx3);font-size:15px;cursor:pointer;padding:5px 3px;}
 .btn-rm:hover{color:var(--red);}
@@ -942,6 +943,11 @@ function renderPipelineMetrics(){
   const totMXN=base.filter(r=>(r.moneda||'MXN')==='MXN').reduce((s,r)=>s+r.monto,0);
   const totUSD=base.filter(r=>r.moneda==='USD').reduce((s,r)=>s+r.monto,0);
   const totGen=totMXN+(totUSD*tipoCambio);
+  const mxnEq=r=>(r.moneda==='USD'?r.monto*tipoCambio:r.monto);
+  const totCotMXN=pipeline.reduce((s,r)=>s+mxnEq(r),0);
+  const ganMXN=pipeline.filter(r=>r.ganable).reduce((s,r)=>s+mxnEq(r),0);
+  const pctGan=totCotMXN?Math.round(ganMXN/totCotMXN*100):0;
+  const nGan=pipeline.filter(r=>r.ganable).length;
   const rojos=base.filter(r=>r.estatus==='En seguimiento'&&semaforoColor(r)==='red').length;
   const label=isFiltered?' <span style="font-size:9px;color:var(--lime);font-weight:700;">(filtrado)</span>':'';
   document.getElementById('metrics-pipeline').innerHTML=
@@ -1074,7 +1080,8 @@ function buildCotHTML(q, preview=false){
   const scale = preview ? 'transform:scale(0.58);transform-origin:top left;width:172%;' : '';
   const moneda = q.moneda || 'MXN';
   const sym = moneda === 'USD' ? 'USD $' : '$';
-  const fmtM = n => sym + (n||0).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const fmtM = n => '$' + (n||0).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const fmtT = n => sym + (n||0).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});
   const filas = items.length ? items.map((item,i)=>`
     <tr>
       <td style="padding:6px 10px;border-bottom:1px solid #e8e8e4;font-size:${preview?'10':'12'}px;">${item.desc||'—'}</td>
@@ -1155,7 +1162,7 @@ function buildCotHTML(q, preview=false){
         </tr>`:''}
         <tr style="background:#383A35 !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;">
           <td colspan="4" style="padding:8px 10px;text-align:right;font-size:12px;font-weight:700;color:#fff;">Total (${moneda==='USD'?'Dólares USD':'Pesos MXN'})</td>
-          <td style="padding:8px 10px;text-align:right;font-size:12px;font-weight:700;color:#A4D55D;">${fmtM(total)}</td>
+          <td style="padding:8px 10px;text-align:right;font-size:12px;font-weight:700;color:#A4D55D;">${fmtT(total)}</td>
         </tr>
       </tfoot>
     </table>
@@ -1418,7 +1425,7 @@ function renderAnalisisMetrics(){
     '<div class="mcard"><div class="mlb">Fuera — ventas cerradas</div><div class="mvl">'+fmt(fueraVend.reduce((s,r)=>s+(r.comprado||0),0))+'</div><div class="msub">'+fueraVend.length+' cierres fuera</div></div>'+
     '<div class="mcard"><div class="mlb">Total MXN</div><div class="mvl" style="color:var(--m)">'+fmt(totMXN)+'</div><div class="msub">'+pipeline.filter(r=>(r.moneda||'MXN')==='MXN').length+' cotizaciones</div></div>'+
     '<div class="mcard"><div class="mlb">Total USD</div><div class="mvl amb">USD $'+totUSD.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+'</div><div class="msub">'+pipeline.filter(r=>r.moneda==='USD').length+' cotizaciones</div></div>'+
-    '<div class="mcard accent" style="border-top-color:var(--lime)"><div class="mlb">Total general MXN</div><div class="mvl hi">'+fmt(totGen)+'</div><div class="msub" style="font-size:9px;">TC $'+tipoCambio.toFixed(2)+' · '+tcFecha+'</div></div>';
+    '<div class="mcard accent"><div class="mlb">% cotizado ganable</div><div class="mvl hi">'+pctGan+'%</div><div class="msub">'+fmt(ganMXN)+' de '+fmt(totCotMXN)+' · '+nGan+'/'+pipeline.length+' cotiz.</div></div>'+'<div class="mcard accent" style="border-top-color:var(--lime)"><div class="mlb">Total general MXN</div><div class="mvl hi">'+fmt(totGen)+'</div><div class="msub" style="font-size:9px;">TC $'+tipoCambio.toFixed(2)+' · '+tcFecha+'</div></div>';
 }
 function getAFiltered(){
   const q=(document.getElementById('srch-a')||{}).value||'';
