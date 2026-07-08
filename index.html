@@ -460,7 +460,8 @@ tr:hover td{background:rgba(56,58,53,.04) !important;}
 </style>
 </head>
 <body>
-<div id="build-stamp" style="position:fixed;bottom:3px;right:6px;font-size:8px;color:var(--tx3);opacity:.55;z-index:99999;font-family:monospace;pointer-events:none;">build 2026-07-07 20:41</div>
+<div id="build-stamp" style="position:fixed;bottom:3px;right:6px;font-size:8px;color:var(--tx3);opacity:.55;z-index:99999;font-family:monospace;pointer-events:none;">build 2026-07-08 08:51</div>
+
 
 
 <nav class="nav">
@@ -1353,10 +1354,10 @@ function buildProductos(){
     const limpio=normProducto(r.material);
     const nombre=limpio||'(Sin material)';
     const key=prodKey(nombre)||'SINMATERIAL';
-    if(!map[key])map[key]={names:{},cotiz:0,vendidas:0,montoCot:0,montoVen:0,montoGan:0,ganCount:0};
+    if(!map[key])map[key]={names:{},cotiz:0,vendidas:0,montoCot:0,montoVen:0,montoGan:0,ganCount:0,rows:[]};
     const o=map[key];
     o.names[nombre]=(o.names[nombre]||0)+1;
-    o.cotiz++;
+    o.cotiz++;o.rows.push(r);
     const monto=parseFloat(r.monto)||0;
     o.montoCot+=(r.moneda==='USD'?monto*tipoCambio:monto);
     if(r.ganable){o.ganCount++;o.montoGan+=(r.moneda==='USD'?monto*tipoCambio:monto);}
@@ -1368,7 +1369,7 @@ function buildProductos(){
     const disp=Object.keys(o.names).sort((a,b)=>o.names[b]-o.names[a])[0];
     return {key:k,nombre:disp,variantes:Object.keys(o.names).length,
       cotiz:o.cotiz,vendidas:o.vendidas,montoCot:o.montoCot,montoVen:o.montoVen,
-      conv:o.cotiz?o.vendidas/o.cotiz:0,montoGan:o.montoGan,ganCount:o.ganCount,pctGan:o.montoCot?o.montoGan/o.montoCot:0};
+      conv:o.cotiz?o.vendidas/o.cotiz:0,montoGan:o.montoGan,ganCount:o.ganCount,pctGan:o.montoCot?o.montoGan/o.montoCot:0,rows:o.rows};
   });
 }
 let prodSort='cotiz', prodDir='desc';
@@ -1409,13 +1410,14 @@ function renderProductos(){
     const w=Math.round(val/max*100);
     return '<div style="display:flex;align-items:center;gap:7px;"><div style="flex:1;height:7px;background:var(--sur3);border-radius:99px;overflow:hidden;"><div style="height:100%;width:'+w+'%;background:'+color+';border-radius:99px;"></div></div><span style="font-variant-numeric:tabular-nums;font-weight:700;min-width:22px;text-align:right;">'+val+'</span></div>';
   };
-  const rows=arr.map(function(p){
+  window._prodArr=arr;
+  const rows=arr.map(function(p,idx){
     const convPct=Math.round(p.conv*100);
     const convColor=convPct>=40?'var(--grn)':convPct>=15?'var(--amb)':'var(--red)';
     const ganPct=Math.round(p.pctGan*100);
     const ganColor=ganPct>=50?'var(--grn)':ganPct>=25?'var(--m)':'var(--tx2)';
     const variBadge=p.variantes>1?' <span title="'+p.variantes+' variantes de nombre agrupadas" style="font-size:9px;color:var(--tx3);font-weight:600;">('+p.variantes+')</span>':'';
-    return '<tr>'+
+    return '<tr style="cursor:pointer" onclick="verProducto('+idx+')">'+
       '<td style="font-weight:600;">'+p.nombre+variBadge+'</td>'+
       '<td>'+bar(p.cotiz,maxC,'var(--m)')+'</td>'+
       '<td style="text-align:right;font-variant-numeric:tabular-nums;color:var(--tx2);">'+fmt(p.montoCot)+'</td>'+
@@ -1489,6 +1491,32 @@ function setLic(btn){
   renderAnalisis();
 }
 function sortA(col){if(faSort===col)faDir=faDir==='asc'?'desc':'asc';else{faSort=col;faDir='asc';}renderAnalisis();}
+function verProducto(idx){
+  const p=(window._prodArr||[])[idx]; if(!p)return;
+  const rows=(p.rows||[]).slice().sort((a,b)=>{
+    const g=(b.ganable?1:0)-(a.ganable?1:0); if(g)return g;
+    const ma=(a.moneda==='USD'?a.monto*tipoCambio:a.monto), mb=(b.moneda==='USD'?b.monto*tipoCambio:b.monto);
+    return mb-ma;
+  });
+  const hdr=document.querySelector('#spanel .spanel-hdr h3'); if(hdr)hdr.textContent=p.nombre;
+  const item=r=>{
+    const estColor=r.estatus==='Ganada'?'var(--grn)':(r.estatus==='Perdida'?'var(--red)':'var(--amb)');
+    return '<div class="df" style="border-bottom:1px solid var(--bd);padding-bottom:9px;margin-bottom:9px;cursor:pointer" onclick="verDetalle('+r.id+')">'
+      +'<p style="font-weight:700">'+(r.empresa||'—')+(r.ganable?' <span style="font-size:9px;font-weight:800;color:var(--grn);border:1px solid var(--grn);border-radius:99px;padding:1px 6px;vertical-align:middle">GANABLE</span>':'')+'</p>'
+      +'<p class="muted" style="font-size:11px">'+(r.nombre||'sin contacto')+' · '+(r.no_cot||'s/folio')+' · '+(r.fecha||'—')+'</p>'
+      +'<p style="font-size:12px">'+fmt(r.monto)+' <span style="color:var(--tx3);font-size:10px">'+(r.moneda||'MXN')+'</span> · <span style="color:'+estColor+';font-weight:700">'+r.estatus+'</span>'+(r.ultimo_contacto?' · últ. '+r.ultimo_contacto:'')+'</p>'
+      +'</div>';
+  };
+  document.getElementById('panel-content').innerHTML=
+    '<div class="df"><label>Resumen del producto</label>'
+    +'<p style="font-size:15px;font-weight:800;color:var(--m);line-height:1.2">'+p.nombre+'</p>'
+    +'<p class="muted" style="font-size:11px;margin-top:3px">'+p.cotiz+' cotizaciones · '+fmt(p.montoCot)+' cotizado · '+p.vendidas+' vendidas · '+Math.round(p.pctGan*100)+'% ganable</p></div>'
+    +'<div class="df"><label>¿Quién lo cotizó? ('+rows.length+') — clic para ver seguimiento</label></div>'
+    +rows.map(item).join('');
+  const actEl=document.getElementById('panel-actions'); if(actEl)actEl.innerHTML='<p style="font-size:10px;color:var(--tx3);text-align:center;line-height:1.5">Clic en un cliente para ver su detalle · edita en Google Sheets</p>';
+  document.getElementById('pol').classList.add('on');
+  document.getElementById('spanel').classList.add('on');
+}
 function verDetalle(id){
   const r=pipeline.find(x=>x.id===id);if(!r)return;
   const semC=semaforoColor(r);
